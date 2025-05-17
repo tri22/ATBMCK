@@ -40,7 +40,6 @@ public class UserProfileServlet extends HttpServlet {
 
 		Map<Order,List<OrderDetail>> orders = orderDao.getOrderWithDetails(user.getId());
 		request.setAttribute("orderMap", orders);
-		System.out.println(orders);
 		request.getRequestDispatcher("Userprofile.jsp").forward(request, response);
 	}
 
