@@ -125,7 +125,13 @@
 								</div>
 							</div>
 						</div>
-
+						<div class="container mt-2">
+							<h2 class="mb-2">Báo cáo mất key</h2>
+							<button id="key-report" class="btn btn-danger btn-sm"
+									data-user-id="${auth.id}"
+									onclick="">Báo cáo
+							</button>
+						</div>
 						<div class="container mt-2">
 							<h2 class="mb-2">Đơn hàng của bạn</h2>
 							<div class="table-responsive">
@@ -203,7 +209,23 @@
 								</table>
 							</div>
 						</div>
-
+					</div>
+					<!-- Key Report Modal -->
+					<div class="modal fade" id="privateKeyModal" tabindex="-1" aria-labelledby="privateKeyModalLabel" aria-hidden="true">
+						<div class="modal-dialog">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h5 class="modal-title">Khóa bí mật của bạn</h5>
+									<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+								</div>
+								<div class="modal-body">
+									<textarea id="privateKeyText" class="form-control" rows="10" readonly></textarea>
+								</div>
+								<div class="modal-footer">
+									<button class="btn btn-primary" onclick="downloadPrivateKey()">Tải về</button>
+								</div>
+							</div>
+						</div>
 					</div>
 
 					<footer id="footer2"></footer>
@@ -306,7 +328,40 @@
 	});
 
 	</script>
+	<script>
+		$("#key-report").click(function () {
+			let userId = $(this).data("user-id");
+			$.ajax({
+				url: "/DoAnLTWeb/KeyReportServlet",
+				method: "POST",
+				data: { user_id: userId },
+				success: function (response) {
+					// response là private key (ở dạng chuỗi base64 hoặc PEM)
+					$("#privateKeyText").val(response);
 
+					// Hiển thị modal
+					let modal = new bootstrap.Modal(document.getElementById("privateKeyModal"));
+					modal.show();
+				},
+				error: function () {
+					alert("Lỗi khi gửi báo cáo.");
+				}
+			});
+		});
+
+		// Hàm tải file .key về máy
+		function downloadPrivateKey() {
+			const text = document.getElementById("privateKeyText").value;
+			const blob = new Blob([text], { type: "text/plain" });
+			const link = document.createElement("a");
+
+			link.href = URL.createObjectURL(blob);
+			link.download = "private_key.key";
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+		}
+	</script>
 
 
 </body>
