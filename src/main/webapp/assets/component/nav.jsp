@@ -55,11 +55,11 @@
 						</c:when>
 						<c:otherwise>
 							<li class="list-item-head2"><a
-								href="/DoAnLTWeb_war/UserProfileServlet"
+								href="/DoAnLTWeb/UserProfileServlet"
 								class="nav-link text-light"> ${sessionScope.auth.username} </a></li>
 						</c:otherwise>
 					</c:choose>
-					<li class="list-item-head2"><a href="/DoAnLTWeb_war/LogoutController"
+					<li class="list-item-head2"><a href="/DoAnLTWeb/LogoutController"
 						class="nav-link text-light">Đăng xuất</a></li>
 				</c:if>
 
