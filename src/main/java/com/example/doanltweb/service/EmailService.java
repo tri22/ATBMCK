@@ -4,6 +4,7 @@ import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 
+import java.security.KeyPair;
 import java.util.Properties;
 
 public class EmailService {
@@ -35,4 +36,6 @@ public class EmailService {
             e.printStackTrace();
         }
     }
+
+
 }
