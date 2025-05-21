@@ -116,8 +116,6 @@
                     contentType: false,
                     dataType: 'json',
                     success: function (data) {
-                        console.log(data);
-                        console.log(messageDiv);
                         if (data.success) {
                             messageDiv.innerHTML = '<div class="alert alert-success">' + data.message + '</div>';
                         } else {

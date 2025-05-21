@@ -216,6 +216,54 @@
             .then((response) => response.text())
             .then((html) => (chonmaybom.innerHTML = html));
     </script>
+<script>
+    $(document).ready(function () {
+        $(document).on('submit', '#reportKeyForm', function (e) {
+            e.preventDefault();
+            $.ajax({
+                url: $(this).attr('action'),
+                type: 'POST',
+                data: $(this).serialize(),
+                dataType: 'json',
+                success: function (data) {
+                    if (data.success) {
+                        $('#reportKeyMessage').html( '<div class="alert alert-success text-dark">' + data.message + '</div>');
+                    } else {
+                        $('#reportKeyMessage').html('<div class="alert alert-danger text-dark">' + data.message + '</div>');
+                    }
+                },
+                error: function () {
+                    $('#reportKeyMessage').html('<div class="alert alert-danger text-dark">Có lỗi xảy ra.</div>');
+                }
+            });
+        });
+
+
+    });
+    $(document).ready(function () {
+        // Cập nhật khóa
+        $(document).on('submit', '#updateKeyForm', function (e) {
+            e.preventDefault();
+            $.ajax({
+                url: '/DoAnLTWeb/PublicKeyServlet',
+                type: 'POST',
+                data: $(this).serialize(),
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data)
+                    if (data.success) {
+                        $('#updateKeyMessage').html( '<div class="alert alert-success text-dark">' + data.message + '</div>');
+                    } else {
+                        $('#updateKeyMessage').html('<div class="alert alert-danger text-dark">' + data.message + '</div>');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    $('#updateKeyMessage').html( '<div class="alert alert-danger text-dark">' + error + '</div>');
+                }
+            });
+        });
+    });
+</script>
 	<script src="assets/js/nav.js"></script>
 	<script src="assets/js/boughtProduct.js"></script>
 </body>

@@ -20,14 +20,14 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
       crossorigin="anonymous"
     />
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="assets/css/giohang.css">
+      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+      <link rel="stylesheet" href="assets/css/headerAndFooter.css">
   </head>
 
   <body>
-    <header id="header"></header> 
-    <div id="header2"></div>
-    <nav id="nav"></nav>
+  <header id="header"></header>
+  <nav id="nav"></nav>
     <div class="container">
       <div class="row">
         <div class="col-md-12">
@@ -236,8 +236,6 @@
         const header2 = document.getElementById("header2");
         const footer2 = document.getElementById("footer2");
         const nav = document.getElementById("nav");
-        const tintuc = document.getElementById("tintuc");
-        const chonmaybom = document.getElementById("chonmaybom");
         const boughtProduct = document.getElementById("bought-product");
         fetch("./assets/component/boughtProduct.jsp")
         	.then((response) => response.text())
@@ -263,6 +261,54 @@
         fetch("./assets/component/chonmaybom.jsp")
             .then((response) => response.text())
             .then((html) => (chonmaybom.innerHTML = html));
+    </script>
+    <script>
+        $(document).ready(function () {
+            $(document).on('submit', '#reportKeyForm', function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: $(this).attr('action'),
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.success) {
+                            $('#reportKeyMessage').html( '<div class="alert alert-success text-dark">' + data.message + '</div>');
+                        } else {
+                            $('#reportKeyMessage').html('<div class="alert alert-danger text-dark">' + data.message + '</div>');
+                        }
+                    },
+                    error: function () {
+                        $('#reportKeyMessage').html('<div class="alert alert-danger text-dark">Có lỗi xảy ra.</div>');
+                    }
+                });
+            });
+
+
+        });
+        $(document).ready(function () {
+            // Cập nhật khóa
+            $(document).on('submit', '#updateKeyForm', function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: '/DoAnLTWeb/PublicKeyServlet',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    dataType: 'json',
+                    success: function (data) {
+                        console.log(data)
+                        if (data.success) {
+                            $('#updateKeyMessage').html( '<div class="alert alert-success text-dark">' + data.message + '</div>');
+                        } else {
+                            $('#updateKeyMessage').html('<div class="alert alert-danger text-dark">' + data.message + '</div>');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        $('#updateKeyMessage').html( '<div class="alert alert-danger text-dark">' + error + '</div>');
+                    }
+                });
+            });
+        });
     </script>
     <script src="assets/js/nav.js"></script>
 	<script src="assets/js/boughtProduct.js"></script>
