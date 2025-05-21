@@ -39,7 +39,6 @@ $('#confirm-btn').click(function () {
         alert("Vui lòng nhập email.");
         return;
     }
-
     // Gửi Ajax đến servlet gửi OTP
     $.ajax({
         url: '/DoAnLTWeb/SendOtpServlet',
@@ -61,4 +60,5 @@ $('#confirm-btn').click(function () {
         }
     });
 });
+
 

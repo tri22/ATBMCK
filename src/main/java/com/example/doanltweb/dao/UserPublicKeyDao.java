@@ -15,9 +15,7 @@ public class UserPublicKeyDao {
     DigitalSignature ds = new DigitalSignature();
     // lưu public key
     public boolean savePublicKey(String publicKey, int userId) {
-
         LocalDateTime now = LocalDateTime.now();
-
         return jdbi.withHandle(handle ->
                 handle.createUpdate("INSERT INTO user_public_key (user_id, public_key, create_at) " +
                                 "VALUES (:user_id, :public_key, :create_at)")
@@ -47,20 +45,13 @@ public class UserPublicKeyDao {
     }
 
     // cập nhật key khi báo mất key
-    public boolean report(int userId,LocalDateTime endTime,String publicKey) throws Exception {
-
-        boolean res = jdbi.withHandle(handle ->
+    public boolean report(int userId,LocalDateTime endTime) throws Exception {
+        return jdbi.withHandle(handle ->
                 handle.createUpdate("UPDATE user_public_key SET end_time = :end_time WHERE user_id = :user_id AND end_time IS NULL")
                         .bind("end_time", endTime)
                         .bind("user_id", userId)
                         .execute() > 0
         );
-
-        if(publicKey!=null && res){
-           return savePublicKey(publicKey,userId);
-        }
-
-        return res;
     }
 
 

@@ -37,7 +37,7 @@ public class DigitalSignature {
     public String signData(String key,String data) throws Exception {
         PrivateKey privateKey = (PrivateKey) loadKeyFromPEM(key);
 
-        Signature signature = Signature.getInstance("SHA256withRSA");
+        Signature signature = Signature.getInstance("SHA512withRSA");
         signature.initSign(privateKey);
         signature.update(data.getBytes(StandardCharsets.UTF_8));
 

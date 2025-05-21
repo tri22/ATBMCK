@@ -65,7 +65,7 @@
 										<a data-bs-toggle="modal" data-bs-target="#reportKeyModal" class="dropdown-item" href="#">Báo mất khóa</a>
 									</li>
 									<li>
-										<a data-bs-toggle="modal" data-bs-target="#upadteKeyModal" class="dropdown-item" href="#">Cập nhật khóa</a>
+										<a data-bs-toggle="modal" data-bs-target="#upadateKeyModal" class="dropdown-item" href="#">Cập nhật khóa</a>
 
 									</li>
 								</ul>
@@ -75,32 +75,24 @@
 							<div class="modal fade" id="reportKeyModal" tabindex="-1" aria-labelledby="reportKeyModalLabel" aria-hidden="true">
 								<div class="modal-dialog">
 									<div class="modal-content">
-										<form id="reportKeyForm" action="/DoAnLTWeb/KeyReportServlet" method="post">
-											<div class="modal-header text-dark">
+										<form id="reportKeyForm" action="/DoAnLTWeb/PublicKeyServlet" method="post">
+
+										<div class="modal-header text-dark">
 												<h5 class="modal-title" id="reportKeyModalLabel">Báo mất khóa</h5>
 												<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
 											</div>
 
-											<div class="modal-body text-dark">
+											<div class="modal-body text-dark border-bottom">
 												<p id="step-text">Bạn có chắc chắn muốn báo mất khóa không?</p>
-
 												<!-- Email input -->
 												<div class="input-group mb-3">
-													<span class="input-group-text">Email</span>
-													<input type="email" class="form-control" name="email" id="emailInput" required>
-												</div>
-
-												<!-- OTP input - ẩn mặc định -->
-												<div class="input-group mb-3 d-none" id="otp-group">
-													<span class="input-group-text">Mã OTP</span>
-													<input type="text" class="form-control" name="otp" required>
+													<span class="input-group-text">Thời gian mất khóa </span>
+													<input type="datetime-local" class="form-control" name="date" id="lostKeyTime" required>
 												</div>
 											</div>
-
-											<div class="modal-footer text-dark">
-												<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-												<button type="button" id="confirm-btn" class="btn btn-danger">Xác nhận</button>
-												<button type="submit" id="submit-otp-btn" class="btn btn-danger d-none">Gửi OTP</button>
+											<div id="reportKeyMessage" class="mt-2"></div>
+											<div class="d-grid gap-2 m-3">
+												<button type="submit" class="btn btn-primary" style="display: block !important;">Xác nhận</button>
 											</div>
 										</form>
 									</div>
@@ -110,30 +102,24 @@
 
 
 							<!-- Modal cập nhật public mới -->
-							<div class="modal fade" id="updateKeyModal" tabindex="-1"
+							<div class="modal fade" id="upadateKeyModal" tabindex="-1"
 								  aria-hidden="true">
 								<div class="modal-dialog">
 									<div class="modal-content">
-										<div class="modal-header">
-											<h5 class="modal-title" id="updateKeyLabel">Xác nhận
-												đơn hàng</h5>
-											<button type="button" class="btn-close"
-													data-bs-dismiss="modal" aria-label="Đóng"></button>
+										<div class="modal-header text-dark">
+											<h5 class="modal-title" >Cập nhật public key mới nhất</h5>
+											<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
 										</div>
 										<div class="modal-body">
-											<form id="updateKeyForm">
-												<input type="datetime-local" class="form-control" name="orderId"
-													   >
-												<div class="mb-3">
-													<label for="otp" class="form-label">Nhập public key:</label>
-													<input
-														type="text" class="form-control" id="otp" name="otp"
-														required>
+											<form id="updateKeyForm" action="/DoAnLTWeb/PublicKeyServlet" method="post">
+												<!-- Public Key input -->
+												<div class="input-group mb-3">
+													<span class="input-group-text">Khóa Public mới </span>
+													<input type="text" class="form-control" name="public-key" id="public-key-field" required>
 												</div>
-												<div id="responseMessage" class="mt-2"></div>
+												<div id="updateKeyMessage" class="mt-2"></div>
 												<div class="d-grid gap-2 mt-3">
-													<button type="submit" class="btn btn-primary">Xác
-														nhận</button>
+													<button type="submit" class="btn btn-primary" style="display: block !important;">Xác nhận</button>
 												</div>
 											</form>
 										</div>
