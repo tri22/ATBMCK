@@ -27,22 +27,16 @@ public class UserPublicKeyDao {
     }
 
     // đọc public key từ db
-    public PublicKey getPublicKey(int userId) throws GeneralSecurityException {
-        return jdbi.withHandle(handle -> {
-            String encodedKey = handle.createQuery("SELECT public_key FROM user_public_key WHERE user_id = :user_id AND end_time IS NULL")
-                    .bind("user_id",userId)
-                    .mapTo(String.class)
-                    .findOne()
-                    .orElse(null);
-
-            if (encodedKey == null) return null;
-
-            byte[] decoded = Base64.getDecoder().decode(encodedKey);
-            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decoded);
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA"); // hoặc "DSA" nếu cần
-            return keyFactory.generatePublic(keySpec);
-        });
+    public String getPublicKey(int userId){
+        return jdbi.withHandle(handle ->
+                handle.createQuery("SELECT public_key FROM user_public_key WHERE user_id = :user_id AND end_time IS NULL")
+                        .bind("user_id", userId)
+                        .mapTo(String.class)
+                        .findOne()
+                        .orElse(null)
+        );
     }
+
 
     // cập nhật key khi báo mất key
     public boolean report(int userId,LocalDateTime endTime) throws Exception {

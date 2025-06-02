@@ -7,9 +7,12 @@ import java.awt.datatransfer.StringSelection;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 
 public class View extends JFrame {
 
@@ -45,6 +48,22 @@ public class View extends JFrame {
         setVisible(true);
     }
 
+    private void exportToFile(String keyContent, String defaultFileName) {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setSelectedFile(new java.io.File(defaultFileName));
+        int userSelection = fileChooser.showSaveDialog(this);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            java.io.File fileToSave = fileChooser.getSelectedFile();
+            try (java.io.FileWriter writer = new java.io.FileWriter(fileToSave)) {
+                writer.write(keyContent);
+                JOptionPane.showMessageDialog(this, "Đã lưu file thành công: " + fileToSave.getAbsolutePath());
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Lỗi khi ghi file: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
     private JPanel createMenuPanel() {
         JPanel menuPanel = new JPanel(new FlowLayout());
 
@@ -71,14 +90,18 @@ public class View extends JFrame {
         // Bước 1: Chọn file
         JPanel filePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel lblFile = new JLabel("Chọn file:");
-        JTextField txtFile = new JTextField(50);
+        JTextArea txtFile = new JTextArea(7, 60);
         JButton btnBrowse = new JButton("Browse");
         btnBrowse.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             int result = fileChooser.showOpenDialog(this);
             if (result == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = fileChooser.getSelectedFile();
-                txtFile.setText(selectedFile.getAbsolutePath());
+                try {
+                    txtFile.setText(readFileAsString(selectedFile.getAbsolutePath()));
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
 
@@ -96,7 +119,11 @@ public class View extends JFrame {
             int result = fileChooser.showOpenDialog(this);
             if (result == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = fileChooser.getSelectedFile();
-                txtKey.setText(selectedFile.getAbsolutePath());
+                try {
+                    txtKey.setText(readFileAsString(selectedFile.getAbsolutePath()));
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
 
@@ -109,7 +136,9 @@ public class View extends JFrame {
         JButton btnSign = new JButton("Ký");
         btnSign.addActionListener(e -> {
             try {
-                String res = ds.signData(txtKey.getText(),txtFile.getText()) ;
+                String keyPem = txtKey.getText().trim();
+                System.out.println(keyPem);
+                String res = ds.signData(keyPem,txtFile.getText().trim()) ;
                 resultArea.setText(res);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
@@ -125,28 +154,7 @@ public class View extends JFrame {
 
         // Sự kiện khi nhấn nút "Xuất chữ ký"
         btnExportSign.addActionListener(e -> {
-            JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setDialogTitle("Chọn nơi lưu chữ ký");
-
-            int userSelection = fileChooser.showSaveDialog(null);
-
-            if (userSelection == JFileChooser.APPROVE_OPTION) {
-                File fileToSave = fileChooser.getSelectedFile();
-                try {
-
-                    String sign = resultArea.getText();
-
-                    // Ghi vào file
-                    FileWriter writer = new FileWriter(fileToSave);
-                    writer.write(sign);
-                    writer.close();
-
-                    JOptionPane.showMessageDialog(null, "Đã lưu chữ ký tại: " + fileToSave.getAbsolutePath());
-                } catch (Exception exception) {
-                    JOptionPane.showMessageDialog(null, "Lỗi khi lưu chữ ký: " + exception.getMessage());
-                    exception.printStackTrace();
-                }
-            }
+                exportToFile(resultArea.getText(),"sign.txt");
         });
 
         JButton copyBtn = new JButton("Copy");
@@ -173,72 +181,93 @@ public class View extends JFrame {
 
 
     private JPanel createVerifyPanel() {
-        JPanel panelXacMinh = new JPanel();
-        panelXacMinh.setLayout(new BoxLayout(panelXacMinh, BoxLayout.Y_AXIS));
+        JPanel verifyPanel = new JPanel();
+        verifyPanel.setLayout(new BoxLayout(verifyPanel, BoxLayout.Y_AXIS));
 
         JLabel label = new JLabel("Giao diện Xác minh chữ ký");
-        panelXacMinh.add(label);
+        verifyPanel.add(label);
 
+        File[] selectedFiles = new File[3]; // 0: tài liệu, 1: chữ ký, 2: public key
+
+        // Tạo TextAreas
+        JTextArea taiLieuArea = createTextArea();
+        JTextArea chuKyArea = createTextArea();
+
+        // Tạo các button
         JButton btnChonTaiLieu = new JButton("Chọn tài liệu gốc");
         JButton btnChonChuKy = new JButton("Chọn file chữ ký");
         JButton btnChonPublicKey = new JButton("Chọn Public Key");
         JButton btnXacMinh = new JButton("Xác minh chữ ký");
-        JLabel lblKetQua = new JLabel("Chưa xác minh");
 
-        File[] selectedFiles = new File[3]; // 0: tài liệu, 1: chữ ký, 2: public key
+        // Panel chứa button + textArea cho tài liệu
+        verifyPanel.add(createRowPanel(btnChonTaiLieu, taiLieuArea));
+        verifyPanel.add(Box.createVerticalStrut(5));
 
-        // Button chọn tài liệu
+        // Panel chứa button + textArea cho chữ ký
+        verifyPanel.add(createRowPanel(btnChonChuKy, chuKyArea));
+        verifyPanel.add(Box.createVerticalStrut(5));
+
+        // Panel chứa button + textArea cho public key
+        JPanel panel = new JPanel(new FlowLayout());
+        JTextArea pubKeyArea = createTextArea();
+        panel.add(btnChonPublicKey );
+        panel.add(pubKeyArea);
+        verifyPanel.add(panel);
+        verifyPanel.add(Box.createVerticalStrut(10));
+
+        // Thêm nút xác minh + kết quả
+        verifyPanel.add(btnXacMinh);
+
+        // Xử lý chọn tài liệu
         btnChonTaiLieu.addActionListener(e -> {
             JFileChooser fc = new JFileChooser();
             if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 selectedFiles[0] = fc.getSelectedFile();
+                try {
+                    taiLieuArea.setText(Files.readString(selectedFiles[0].toPath()));
+                } catch (IOException ex) {
+                    taiLieuArea.setText("Không thể đọc tài liệu: " + ex.getMessage());
+                }
             }
         });
 
-        // Button chọn chữ ký
+        // Chữ ký
         btnChonChuKy.addActionListener(e -> {
             JFileChooser fc = new JFileChooser();
             if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 selectedFiles[1] = fc.getSelectedFile();
-            }
-        });
-
-        // Button chọn public key
-        btnChonPublicKey.addActionListener(e -> {
-            JFileChooser fc = new JFileChooser();
-            if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                selectedFiles[2] = fc.getSelectedFile();
-            }
-        });
-
-        // Nút xác minh
-        btnXacMinh.addActionListener(e -> {
-            if (selectedFiles[0] == null || selectedFiles[1] == null || selectedFiles[2] == null) {
-                JOptionPane.showMessageDialog(null, "Vui lòng chọn đầy đủ tài liệu, chữ ký và public key");
-                return;
-            }
-
-            try {
-                byte[] data = Files.readAllBytes(selectedFiles[0].toPath());
-                byte[] signatureBytes = Files.readAllBytes(selectedFiles[1].toPath());
-
-                // Đọc Public Key
-                byte[] keyBytes = Files.readAllBytes(selectedFiles[2].toPath());
-                X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
-                KeyFactory kf = KeyFactory.getInstance("RSA");
-                PublicKey publicKey = kf.generatePublic(spec);
-
-                // Xác minh chữ ký
-                Signature sig = Signature.getInstance("SHA256withRSA");
-                sig.initVerify(publicKey);
-                sig.update(data);
-
-                boolean verified = sig.verify(signatureBytes);
-                if (verified) {
-                    lblKetQua.setText("Chữ ký hợp lệ!");
-                } else {
-                    lblKetQua.setText("Chữ ký không hợp lệ!");
+                try {
+                    chuKyArea.setText(readFileAsString(selectedFiles[1].getAbsolutePath()));
+                } catch (IOException ex) {
+                    chuKyArea.setText("Không thể đọc chữ ký: " + ex.getMessage());
                 }
+            }
+        });
+
+
+        // Public key
+        btnChonPublicKey.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            int result = fileChooser.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                try {
+                    String content = readFileAsString(selectedFile.getAbsolutePath());
+                    pubKeyArea.setText(content);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+
+        // Xác minh chữ ký
+        btnXacMinh.addActionListener(e -> {
+            try {
+                String originalData = taiLieuArea.getText().trim();
+                String signature = chuKyArea.getText().trim();
+                String publicKeyPem = pubKeyArea.getText().trim();
+                boolean verified = ds.verifySignature(originalData, signature, publicKeyPem);
+                JOptionPane.showMessageDialog(null, verified ? "Chữ ký hợp lệ!" : "Chữ ký không hợp lệ!");
 
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -246,15 +275,29 @@ public class View extends JFrame {
             }
         });
 
-        // Thêm các nút vào giao diện
-        panelXacMinh.add(btnChonTaiLieu);
-        panelXacMinh.add(btnChonChuKy);
-        panelXacMinh.add(btnChonPublicKey);
-        panelXacMinh.add(btnXacMinh);
-        panelXacMinh.add(lblKetQua);
-
-        return panelXacMinh;
+        return verifyPanel;
     }
+
+    // Tạo text area mặc định
+    private JTextArea createTextArea() {
+        JTextArea area = new JTextArea(4, 40);
+        area.setLineWrap(true);
+        area.setWrapStyleWord(true);
+        area.setEditable(false);
+        return area;
+    }
+
+    // Tạo panel chứa button + textarea (cùng hàng)
+    private JPanel createRowPanel(JButton button, JTextArea textArea) {
+        JPanel rowPanel = new JPanel();
+        rowPanel.setLayout(new BoxLayout(rowPanel, BoxLayout.X_AXIS));
+        rowPanel.add(button);
+        rowPanel.add(Box.createHorizontalStrut(10));
+        rowPanel.add(new JScrollPane(textArea));
+        return rowPanel;
+    }
+
+
 
 
     private JPanel createGenKeyPanel() {
@@ -277,7 +320,7 @@ public class View extends JFrame {
         JButton exportPrivateBtn = new JButton("Xuất File");
         exportPrivateBtn.setBounds(610, 80, 100, 30);
         exportPrivateBtn.addActionListener(e -> {
-            exportKeyToFile(privateKeyField.getText(), "private_key.pem");
+            exportToFile(privateKeyField.getText(), "private_key.pem");
         });
         JButton copyPrivateBtn = new JButton("Copy");
         copyPrivateBtn.setBounds(720, 80, 80, 30);
@@ -300,7 +343,7 @@ public class View extends JFrame {
         JButton exportPublicBtn = new JButton("Xuất File");
         exportPublicBtn.setBounds(610, 180, 100, 30);
         exportPublicBtn.addActionListener(e -> {
-            exportKeyToFile(publicKeyField.getText(), "public_key.pem");
+            exportToFile(publicKeyField.getText(), "public_key.pem");
         });
         JButton copyPublicBtn = new JButton("Copy");
         copyPublicBtn.setBounds(720, 180, 80, 30);
@@ -345,21 +388,18 @@ public class View extends JFrame {
     }
 
 
-    private void exportKeyToFile(String keyContent, String defaultFileName) {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setSelectedFile(new java.io.File(defaultFileName));
-        int userSelection = fileChooser.showSaveDialog(this);
 
-        if (userSelection == JFileChooser.APPROVE_OPTION) {
-            java.io.File fileToSave = fileChooser.getSelectedFile();
-            try (java.io.FileWriter writer = new java.io.FileWriter(fileToSave)) {
-                writer.write(keyContent);
-                JOptionPane.showMessageDialog(this, "Đã lưu file thành công: " + fileToSave.getAbsolutePath());
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Lỗi khi ghi file: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
-            }
+
+    public static String readFileAsString(String filePath) throws IOException {
+        String content = Files.readString(Paths.get(filePath), StandardCharsets.UTF_8);
+        // Chuẩn hóa xuống dòng, loại bỏ BOM nếu có
+        content = content.replace("\r\n", "\n").replace("\r", "\n").trim();
+        if (content.startsWith("\uFEFF")) { // BOM
+            content = content.substring(1);
         }
+        return content;
     }
+
 
 
     public static void main(String[] args) {

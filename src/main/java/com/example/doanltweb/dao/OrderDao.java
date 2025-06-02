@@ -38,10 +38,10 @@ public class OrderDao {
 	                    String status = rs.getString("status");
 	                    int idPayment = rs.getInt("idPayment");
 	                    int quantity = rs.getInt("quantity");
-						String otp = rs.getString("otp");
+						String sign = rs.getString("sign");
 	                    User user = userDao.getUserbyid(userId);
 	                    Payment payment = paymentDao.getPaymentbyid(idPayment);
-	                    return new Order(orderId, user, totalPrice, orderDate, status, payment, quantity,otp);
+	                    return new Order(orderId, user, totalPrice, orderDate, status, payment, quantity,sign);
 	                }).list());
 	    }
 	    public List<Order> getActiveOrder(int id) {
@@ -57,10 +57,10 @@ public class OrderDao {
 	                String status = rs.getString("status");
 	                int idPayment = rs.getInt("idPayment");
 	                int quantity = rs.getInt("quantity");
-	                String otp = rs.getString("otp");
+	                String sign = rs.getString("sign");
 	                User user = userDao.getUserbyid(userId);
 	                Payment payment = paymentDao.getPaymentbyid(idPayment);
-	                return new Order(orderId, user, totalPrice, orderDate, status, payment, quantity, otp);
+	                return new Order(orderId, user, totalPrice, orderDate, status, payment, quantity, sign);
 	            })
 	            .list()
 	        );
@@ -95,11 +95,11 @@ public class OrderDao {
 	                      String status = rs.getString("status");
 	                      int idPayment = rs.getInt("idPayment");
 	                      int quantity = rs.getInt("quantity");
-						  String otp = rs.getString("otp");
+						  String sign = rs.getString("sign");
 	                      User user = userDao.getUserbyid(userId);  // Lấy thông tin người dùng
 	                      Payment payment = paymentDao.getPaymentbyid(idPayment);
 	                      System.out.println(payment.getName());
-	                      return new Order(orderId, user, totalPrice, orderDate, status, payment, quantity,otp);
+	                      return new Order(orderId, user, totalPrice, orderDate, status, payment, quantity,sign);
 	                  })
 	                  .list()  // Trả về danh sách đơn hàng
 	        );
@@ -129,20 +129,20 @@ public class OrderDao {
 		return map;
 	}
 
-	    public boolean createOrder(int userId, double totalPrice, int idPayment, int quantity, int cartId,String otp) {
+	    public boolean createOrder(int userId, double totalPrice, int idPayment, int quantity, int cartId,String sign) {
 	        Jdbi jdbi = JDBIConnect.get();
 
 	        try {
 	            return jdbi.inTransaction(handle -> {
 	                // 1️⃣ Chèn đơn hàng mới và lấy ID đơn hàng
 	                int orderId = handle.createUpdate(
-	                        "INSERT INTO orders (idUser, totalPrice, orderDate, status, idPayment,quantity,otp) " +
-	                        "VALUES (:userId, :totalPrice, NOW(), 'pending',:idPayment,:quantity,:otp)")
+	                        "INSERT INTO orders (idUser, totalPrice, orderDate, status, idPayment,quantity,sign) " +
+	                        "VALUES (:userId, :totalPrice, NOW(), 'VERIFIED',:idPayment,:quantity,:sign)")
 	                    .bind("userId", userId)
 	                    .bind("totalPrice", totalPrice)
 	                    .bind("idPayment", idPayment)
 	                    .bind("quantity", quantity)
-						.bind("otp",otp)
+						.bind("sign",sign)
 	                    .executeAndReturnGeneratedKeys("id")  
 	                    .mapTo(Integer.class)
 	                    .one();
@@ -235,9 +235,75 @@ public class OrderDao {
 	}
 
 
-	
+    public boolean insertSignature(String sign, int userId) {
+		Jdbi jdbi = JDBIConnect.get();
+		int rowsAffected = jdbi.withHandle(handle ->
+			handle.createUpdate("UPDATE orders SET signature = :sign WHERE idUser = :userId")
+                    .bind("userId", userId)
+                    .bind("sign", sign)
+                    .execute()
 
+		);
+		return rowsAffected>0;
+    }
 
+	public Map<Order, List<OrderDetail>> getFilteredOrders(String status, String fromDateStr, String toDateStr, Integer paymentMethod) {
+		Jdbi jdbi = JDBIConnect.get();
+		Map<Order, List<OrderDetail>> map = new LinkedHashMap<>();
 
+		StringBuilder queryBuilder = new StringBuilder("SELECT * FROM orders WHERE 1=1");
 
+		if (status != null && !status.isEmpty()) {
+			queryBuilder.append(" AND status = :status");
+		}
+		if (fromDateStr != null && !fromDateStr.isEmpty()) {
+			queryBuilder.append(" AND orderDate >= :fromDate");
+		}
+		if (toDateStr != null && !toDateStr.isEmpty()) {
+			queryBuilder.append(" AND orderDate <= :toDate");
+		}
+		if (paymentMethod != null) {
+			queryBuilder.append(" AND idPayment = :paymentMethod");
+		}
+
+		List<Order> orders = jdbi.withHandle(handle -> {
+			var query = handle.createQuery(queryBuilder.toString());
+
+			if (status != null && !status.isEmpty()) {
+				query.bind("status", status);
+			}
+			if (fromDateStr != null && !fromDateStr.isEmpty()) {
+				query.bind("fromDate", fromDateStr);
+			}
+			if (toDateStr != null && !toDateStr.isEmpty()) {
+				query.bind("toDate", toDateStr);
+			}
+			if (paymentMethod != null) {
+				query.bind("paymentMethod", paymentMethod);
+			}
+
+			return query.map((rs, ctx) -> {
+				int orderId = rs.getInt("id");
+				int userId = rs.getInt("idUser");
+				double totalPrice = rs.getDouble("totalPrice");
+				String orderDate = rs.getString("orderDate");
+				String orderStatus = rs.getString("status");  // đổi tên biến để không trùng tên method
+				int idPayment = rs.getInt("idPayment");
+				int quantity = rs.getInt("quantity");
+				String sign = rs.getString("sign");
+
+				User user = userDao.getUserbyid(userId);
+				Payment payment = paymentDao.getPaymentbyid(idPayment);
+
+				return new Order(orderId, user, totalPrice, orderDate, orderStatus, payment, quantity, sign);
+			}).list();
+		});
+
+		for (Order order : orders) {
+			List<OrderDetail> details = getDetailById(order.getId());
+			map.put(order, details);
+		}
+
+		return map;
+	}
 }

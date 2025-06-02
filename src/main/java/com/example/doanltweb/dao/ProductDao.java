@@ -187,47 +187,67 @@ public class ProductDao {
     }
 
 
-//    public boolean deleteById(String id) {
-//        Jdbi jdbi = JDBIConnect.get();
-//        return JDBIConnect.get().withHandle(h -> {
-//            String sql = "DELETE FROM product WHERE id = :id";
-//            return h.createUpdate(sql).bind("id", id).execute() > 0;
-//        });
-//    }
+    public List<Product> getProductsByPageAndSort(int offset, int pageSize, String sort) {
+        Jdbi jdbi = JDBIConnect.get();
 
+        String orderByClause;
+        if ("priceHighToLow".equals(sort)) {
+            orderByClause = "ORDER BY priceProduct DESC";
+        } else if ("priceLowToHigh".equals(sort)) {
+            orderByClause = "ORDER BY priceProduct ASC";
+        } else if ("newest".equals(sort)) {
+            orderByClause = "ORDER BY manufactureDate DESC"; // Vì bảng bạn chưa có createdDate
+        } else {
+            orderByClause = "ORDER BY id ASC"; // Mặc định
+        }
 
-    //        public static void main(String[] args) {
-//            // Tạo đối tượng Product
-//            Product product = new Product();
-//            product.setNameProduct("Máy bơm nước");
-//            product.setImage("image_url.jpg");
-//            product.setPriceProduct(1000000);
-//            product.setDescription("Máy bơm nước hiệu quả cao");
-//            product.setManufactureDate("2025-03-20");
-//            product.setPower("2 HP");
-//            product.setPressure(10.5);
-//            product.setFlowRate(500);
-//            product.setPipeDiameter(50);
-//            product.setVoltage(220);
-//            product.setBrand("Bơm ABC");
-//            product.setWarrantyMonths(24);
-//            product.setStock(50);
-//            product.setIdCategory(1);
-//            product.setIdSupplier(2);
-//
-//            // Khởi tạo ProductDao
-//            ProductDao productDao = new ProductDao();
-//
-//            // Thêm sản phẩm vào cơ sở dữ liệu
-//            boolean success = productDao.addProduct(product);
-//
-//            // Kiểm tra kết quả
-//            if (success) {
-//                System.out.println("Sản phẩm đã được thêm thành công!");
-//            } else {
-//                System.out.println("Có lỗi xảy ra khi thêm sản phẩm.");
-//            }
-//        }
+        String sql = "SELECT id, nameProduct, priceProduct, image AS imageProduct FROM product "
+                + orderByClause + " LIMIT :limit OFFSET :offset";
+
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .bind("limit", pageSize)
+                        .bind("offset", offset)
+                        .map((rs, ctx) -> {
+                            Product p = new Product();
+                            p.setId(rs.getInt("id"));
+                            p.setNameProduct(rs.getString("nameProduct"));
+                            p.setPriceProduct(rs.getDouble("priceProduct"));
+                            p.setImage(rs.getString("imageProduct"));
+                            return p;
+                        })
+                        .list()
+        );
+    }
+    public int getTotalProducts() {
+        Jdbi jdbi = JDBIConnect.get();
+        String sql = "SELECT COUNT(*) FROM product";
+
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .mapTo(Integer.class)
+                        .one()
+        );
+    }
+
+    public List<String> searchProductsstr(String query) {
+        Jdbi jdbi = JDBIConnect.get(); // dùng kết nối có sẵn
+        return jdbi.withHandle(handle ->
+                handle.createQuery("SELECT nameProduct FROM product WHERE nameProduct LIKE :query LIMIT 5")
+                        .bind("query", "%" + query + "%")
+                        .mapTo(String.class)
+                        .list()
+        );
+    }
+    public List<Product> searchProducts(String keyword) {
+        Jdbi jdbi = JDBIConnect.get();
+        return jdbi.withHandle(handle ->
+                handle.createQuery("SELECT * FROM product WHERE nameProduct LIKE :keyword")
+                        .bind("keyword", "%" + keyword + "%")
+                        .mapToBean(Product.class)
+                        .list()
+        );
+    }
     public static void main(String[] args) {
         ProductDao productDao = new ProductDao();
         System.out.println(productDao.getAll());

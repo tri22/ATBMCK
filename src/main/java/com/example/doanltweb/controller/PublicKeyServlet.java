@@ -1,4 +1,5 @@
 package com.example.doanltweb.controller;
+import com.example.doanltweb.dao.OrderDao;
 import com.example.doanltweb.dao.UserPublicKeyDao;
 import com.example.doanltweb.dao.model.User;
 import com.example.doanltweb.service.EmailService;
@@ -40,6 +41,9 @@ public class PublicKeyServlet extends HttpServlet {
         UserPublicKeyDao dao = new UserPublicKeyDao();
         String date = request.getParameter("date");
         String newPublicKey = request.getParameter("public-key");
+        String sign = request.getParameter("signature").trim();
+        System.out.println("Signature raw: " + sign);
+
         boolean success = false;
         if (date != null && newPublicKey == null) {
             try {
@@ -49,8 +53,11 @@ public class PublicKeyServlet extends HttpServlet {
             } catch (Exception e) {
                  e.getMessage();
             }
-        } else {
+        } else if(newPublicKey!=null){
              success = dao.savePublicKey(newPublicKey, user.getId());
+        }else if(sign!=null){
+            OrderDao orderDao = new OrderDao();
+            success = orderDao.insertSignature(sign, user.getId());
         }
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json");
