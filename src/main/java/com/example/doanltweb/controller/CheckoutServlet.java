@@ -1,6 +1,9 @@
 package com.example.doanltweb.controller;
 
+import com.example.doanltweb.dao.UserPublicKeyDao;
+import com.example.doanltweb.digitalSign.DigitalSignature;
 import com.example.doanltweb.service.EmailService;
+import com.google.gson.JsonArray;
 import jakarta.mail.Authenticator;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
@@ -17,9 +20,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
+import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,18 +43,6 @@ import com.google.gson.JsonObject;
 public class CheckoutServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-	// Hàm tạo OTP 6 chữ số
-	public static String generateOTP() {
-		Random random = new Random();
-		StringBuilder otp = new StringBuilder();
-
-		// Tạo 6 chữ số ngẫu nhiên
-		for (int i = 0; i < 6; i++) {
-			otp.append(random.nextInt(10)); // Chọn ngẫu nhiên 1 số từ 0 đến 9
-		}
-
-		return otp.toString();
-	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
@@ -61,36 +51,68 @@ public class CheckoutServlet extends HttpServlet {
 
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-	    OrderDao orderDao = new OrderDao();
-	    CartDao cartDao = new CartDao();
-	    HttpSession session = request.getSession();
-	    User user = (User) session.getAttribute("auth");
-	    Cart cart = cartDao.getCartByUserId(user.getId());
-		String otp = generateOTP();
-
-	    int paymentMethod = Integer.parseInt(request.getParameter("paymentMethod"));
-
-	    CartUtils.mergeSessionCartToDb(user.getId(),session);
-	    boolean order = orderDao.createOrder(user.getId(), cart.getTotalPrice(), paymentMethod, cart.getTotalAmount(), cart.getId(),otp);
-	    if(order) {
-	    	cartDao.clearCart(cart.getId());
-	    	session.setAttribute("cart", new ArrayList<CartItem>());
-			// Gửi email trong thread riêng
-			new Thread(() -> {
-				EmailService.sendOTP(user.getEmail(), otp);
-			}).start();
-	    }
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("application/json");
-
 		JsonObject jsonResponse = new JsonObject();
-		jsonResponse.addProperty("success", order);
-		jsonResponse.addProperty("message", order ? "Đơn hàng đã tạo thành công!" : "Đặt hàng thất bại");
+
+		OrderDao orderDao = new OrderDao();
+		CartDao cartDao = new CartDao();
+		HttpSession session = request.getSession();
+		User user = (User) session.getAttribute("auth");
+		Cart cart = cartDao.getCartByUserId(user.getId());
+		UserPublicKeyDao userPublicKeyDao = new UserPublicKeyDao();
+		DigitalSignature ds = new DigitalSignature();
+
+
+		String publicKey = userPublicKeyDao.getPublicKey(user.getId());
+        String sign = request.getParameter("signature").trim();
+		System.out.println("Signature raw: " + sign);
+		int paymentMethod = Integer.parseInt(request.getParameter("paymentMethod"));
+		CartUtils.mergeSessionCartToDb(user.getId(),session);
+
+		JsonObject jsonData = new JsonObject();
+		jsonData.addProperty("idUser", user.getId());
+		jsonData.addProperty("totalPrice", cart.getTotalPrice());
+		String orderTime = (String) session.getAttribute("orderTime");
+		jsonData.addProperty("orderDate", orderTime);
+		jsonData.addProperty("idPayment", paymentMethod);
+		jsonData.addProperty("quantity", cart.getTotalAmount());
+		List<CartItem> cartItems = cartDao.getListCartItemByCartId(cart.getId());
+		JsonArray orderDetailsArray = new JsonArray();
+		for (CartItem item : cartItems) {
+			JsonObject detail = new JsonObject();
+			detail.addProperty("productId", item.getProduct().getId());
+			detail.addProperty("productName", item.getProduct().getNameProduct());
+			detail.addProperty("price", item.getProduct().getPriceProduct());
+			detail.addProperty("quantity", item.getQuantity());
+			orderDetailsArray.add(detail);
+		}
+		jsonData.add("orderDetails", orderDetailsArray);
+
+		String orderData = jsonData.toString();
+		System.out.println("orderData: " + orderData);
+        try {
+            boolean verify = ds.verifySignature(orderData,sign,publicKey);
+			if(verify) {
+				boolean order = orderDao.createOrder(user.getId(), cart.getTotalPrice(), paymentMethod, cart.getTotalAmount(), cart.getId(),sign);
+				if(order) {
+					cartDao.clearCart(cart.getId());
+					session.setAttribute("cart", new ArrayList<CartItem>());
+				}
+				jsonResponse.addProperty("success", order);
+				jsonResponse.addProperty("message", order ? "Đơn hàng đã tạo thành công!" : "Đặt hàng thất bại");
+			}else {
+				jsonResponse.addProperty("success", false);
+				jsonResponse.addProperty("message", "Chữ ký không hợp lệ!");
+			}
+        } catch (Exception e) {
+
+            throw new RuntimeException(e);
+        }
 
 		PrintWriter out = response.getWriter();
 		out.print(jsonResponse.toString());
 		out.flush();
-
 	}
 
 

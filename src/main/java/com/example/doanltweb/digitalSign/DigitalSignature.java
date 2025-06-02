@@ -17,12 +17,12 @@ public class DigitalSignature {
 
     public DigitalSignature(KeyPair keyPair) {
         this.keyPair = keyPair;
-
+//ZKcgMQ8EIHm+1+FlRpsGyoaxXlqp8w778Vq/rXUwnzPAW9SFdFR98bL4j72rq+o/hMrjL4NaL2EIYbJnFI1UOaAUQXUlOLniX/Voo9pG5aVAmqyPu5OZ8kk32hBrCjDkfpTDBUKzw0ktBH6k7k784HOp6fhl5V0gFJtgUOD+3BFEQoMfRAgZyew06zc/YWEkGOK+Wt3PB7IQl5JmmslNytieBIhfwy6KPoR2dqlVixxuJZnO+rJbSOlsKwTQfykULNARzxlXt9UUBc7EctOG+lUZqyabt7ACguRJ6I/IDqvW6QTCsogcNWz+ug3xWl1FdKjRk6yf8SKvqgsXLQI6rQ==
     }
 
     public KeyPair generateKey() throws NoSuchAlgorithmException {
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-        keyGen.initialize(512);
+        keyGen.initialize(2048);
         this.keyPair = keyGen.generateKeyPair();
         return this.keyPair;
     }
@@ -48,10 +48,10 @@ public class DigitalSignature {
 
 
 
-    public boolean verifySignature(String data, String signatureStr) throws Exception {
-        if (keyPair.getPublic() == null) throw new Exception("Public key chưa được khởi tạo.");
-        Signature signature = Signature.getInstance("SHA256withRSA");
-        signature.initVerify(keyPair.getPublic());
+    public boolean verifySignature(String data, String signatureStr, String pubKey) throws Exception {
+        PublicKey publicKey = (PublicKey) loadKeyFromPEM(pubKey);
+        Signature signature = Signature.getInstance("SHA512withRSA");
+        signature.initVerify(publicKey);
         signature.update(data.getBytes());
         byte[] digitalSignature = Base64.getDecoder().decode(signatureStr);
         return signature.verify(digitalSignature);
@@ -85,34 +85,44 @@ public class DigitalSignature {
     }
 
     public Key loadKeyFromPEM(String pem) throws Exception {
-        pem = pem.trim();
+        pem = pem.replaceAll("\\r", "").trim(); // bỏ \r và trim đầu cuối
 
         if (pem.contains("-----BEGIN PUBLIC KEY-----")) {
-            // Xử lý Public Key (X.509)
             String content = pem
                     .replace("-----BEGIN PUBLIC KEY-----", "")
                     .replace("-----END PUBLIC KEY-----", "")
-                    .replaceAll("\\s+", "");
+                    .replaceAll("\\s", ""); // bỏ tất cả khoảng trắng
             byte[] decoded = Base64.getDecoder().decode(content);
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decoded);
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-            return keyFactory.generatePublic(keySpec);
+            return KeyFactory.getInstance("RSA").generatePublic(keySpec);
 
         } else if (pem.contains("-----BEGIN PRIVATE KEY-----")) {
-            // Xử lý Private Key (PKCS#8)
             String content = pem
                     .replace("-----BEGIN PRIVATE KEY-----", "")
                     .replace("-----END PRIVATE KEY-----", "")
-                    .replaceAll("\\s+", "");
+                    .replaceAll("\\s", "");
             byte[] decoded = Base64.getDecoder().decode(content);
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decoded);
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-            return keyFactory.generatePrivate(keySpec);
+            return KeyFactory.getInstance("RSA").generatePrivate(keySpec);
 
         } else {
+            System.out.println("== Định dạng PEM không hợp lệ ==");
+            System.out.println(pem);
             throw new IllegalArgumentException("Không hỗ trợ định dạng PEM này.");
         }
     }
 
 
+    public static void main(String[] args) throws Exception {
+        DigitalSignature ds = new DigitalSignature();
+        System.out.println(ds.loadKeyFromPEM("-----BEGIN PUBLIC KEY-----\n" +
+                "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv57O7JbDGnhySMR8eSot\n" +
+                "e4NptfaRYKrVqv4MNOLNFgkEFKgm4sI7SKo9B7BnmlQ6egUkJYpdWT6psA6bCgAZ\n" +
+                "xdC+ol3w982m5/MO5gs2MOQ/AwvETJg2I10OyMn+4+tXO5zmamJlEeO/wCWGMGbL\n" +
+                "tDYCOHNFGuco1L+FYRQ80nS8Dv+j7bJnBl2afk0vn+6mRBYtQRHzh8dHfLhY5b6l\n" +
+                "vLDKfwAsWy0j9T3J13OQfRzpeyvVuFcztPT+fAVPn9YMBOmQjRCZwIJ+bxZfzes0\n" +
+                "0/IOHNzR94yy8odNfI41+XbGYxdBGWhznm2i7zWaaMpahBey4p3fIOdW97U2ivWc\n" +
+                "0wIDAQAB\n" +
+                "-----END PUBLIC KEY-----"));
+    }
 }

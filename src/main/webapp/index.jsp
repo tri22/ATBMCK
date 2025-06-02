@@ -37,7 +37,8 @@
                         <div class="col-md-2">
                             <div class="card position-relative themenu">
                                 <div class="card-body">
-                                    <a href="maybomtheohang?id_supplier=${s.id}"><img src="assets/imgs/nhataitro/${s.image}"
+                                    <a href="maybomtheohang?id_supplier=${s.id}">
+                                        <img src="assets/imgs/nhataitro/${s.image}"
                                                                   class=" img-fluid rounded"> </a>
                                 </div>
                             </div>
@@ -58,32 +59,30 @@
                             <div class="row g-4">
 									<c:forEach items="${pall}" var="p" end="3">
 										<div class="col-md-3">
-											<div id="isReload"></div>
 											<a href="chitietsanpham?id=${p.id}"
 												style="text-decoration: none">
 												<div class="card position-relative">
 													<div class="discount-badge">-10%</div>
-													<img src="assets/imgs/maybom/${p.image}"
+													<img src="${p.image}"
 														class="card-img-top" alt="Bơm tăng áp mini Pamtex 10" />
 													<div class="card-body themaybom" style="height: 200px">
 														<h6 class="card-title">${p.nameProduct}</h6>
-														<p class="old-price">Giá cũ: 720.000đ</p>
-														<p class="new-price">Giá mới: 650.000đ</p>
+                                                        <p class="new-price"></p>
+														<p class="new-price">Giá: ${p.priceProduct} Đ</p>
 														<c:if test="${p.stock != 0}">
 															<div class="option">
 																<div class="wrap-option">
-																	<%-- <form class="addToCartForm">
+																	 <form class="addToCartForm">
 																		<input type="hidden" name="productId" value="${ p.getId()}"/>
 																		<input type="hidden" name="quantity" value=1 />
 																		<button type="submit" class="icon-cart">
 																			<i class="bi-cart4"></i>
 																		</button>
-																	</form> --%>
+																	</form>
 
 																	<a href="#" class="icon-like"> <i
 																		class="bi bi-cash-stack"></i>
 																	</a>
-
 																</div>
 															</div>
 														</c:if>
@@ -116,17 +115,16 @@
                             <div class="row g-4">
                                <c:forEach items="${pall}" var="p" end="7">
 										<div class="col-md-3 ">
-											<div id="isReload"></div>
 											<a href="chitietsanpham?id=${p.id}"
 												style="text-decoration: none">
 												<div class="card position-relative">
 													<div class="discount-badge">-10%</div>
-													<img src="assets/imgs/maybom/${p.image}"
+													<img src="${p.image}"
 														class="card-img-top" alt="Bơm tăng áp mini Pamtex 10" />
 													<div class="card-body themaybom" style="height: 200px">
 														<h6 class="card-title">${p.nameProduct}</h6>
-														<p class="old-price">Giá cũ: 720.000đ</p>
-														<p class="new-price">Giá mới: 650.000đ</p>
+														<p class="old-price"></p>
+														<p class="new-price">Giá: ${p.priceProduct} Đ</p>
 														<c:if test="${p.stock != 0}">
 															<div class="option">
 																<div class="wrap-option">
