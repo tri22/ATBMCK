@@ -46,7 +46,7 @@
                     </c:forEach>
                 </div>
                 <!-- phan thay doi -->
-                <div class="" row pt-3>
+                <div class=" row pt-3">
                     <div class="col-md">
                         <!-- may bom khuyen mai  -->
                         <div class="container my-4" style="background-color:#162e5c">

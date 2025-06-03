@@ -200,15 +200,32 @@ public class OrderDao {
 	}
 
 
-	public boolean verifyOrder(int orderId, String otp) {
+	public Order getById(int id) {
 		Jdbi jdbi = JDBIConnect.get();
-		int rowsAffected = jdbi.withHandle(handle ->
-				handle.createUpdate("UPDATE orders SET status = 'VERIFIED' WHERE id = :id AND otp = :otp AND orderDate > NOW() - INTERVAL 24 HOUR ")
-						.bind("otp", otp)
-						.bind("id", orderId)
-						.execute());
-		return rowsAffected>0;
+		return jdbi.withHandle(handle ->
+				handle.createQuery("SELECT * FROM orders WHERE id = :id ")
+						.bind("id", id)
+						.map((rs, ctx) -> {
+							Order order = new Order();
+							order.setId(id);
+							order.setOrderDate(rs.getString("orderDate"));
+							order.setQuantity(rs.getInt("quantity"));
+							order.setTotalPrice(rs.getDouble("totalPrice"));
+							order.setStatus(rs.getString("status"));
+
+							User user = userDao.getUserbyid(rs.getInt("idUser"));  // Lấy thông tin người dùng
+							Payment payment = paymentDao.getPaymentbyid(rs.getInt("idPayment"));
+							order.setUser(user);
+							order.setPaymentMethod(payment);
+
+							return order;
+						})
+						.findFirst()
+						.orElse(null)
+		);
 	}
+
+
 
 	public List<Order> getOrdersWithPagination(int offset, int limit) {
 	    Jdbi jdbi = JDBIConnect.get();
@@ -235,17 +252,15 @@ public class OrderDao {
 	}
 
 
-    public boolean insertSignature(String sign, int userId) {
+	public boolean insertSignature(String sign, int userId) {
 		Jdbi jdbi = JDBIConnect.get();
 		int rowsAffected = jdbi.withHandle(handle ->
-			handle.createUpdate("UPDATE orders SET signature = :sign WHERE idUser = :userId")
-                    .bind("userId", userId)
-                    .bind("sign", sign)
-                    .execute()
-
-		);
+				handle.createUpdate("UPDATE orders SET sign = :sign WHERE idUser = :userId")
+						.bind("sign", sign)
+						.bind("userId", userId)
+						.execute());
 		return rowsAffected>0;
-    }
+	}
 
 	public Map<Order, List<OrderDetail>> getFilteredOrders(String status, String fromDateStr, String toDateStr, Integer paymentMethod) {
 		Jdbi jdbi = JDBIConnect.get();
@@ -306,4 +321,6 @@ public class OrderDao {
 
 		return map;
 	}
+
+
 }

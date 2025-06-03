@@ -248,6 +248,8 @@ public class ProductDao {
                         .list()
         );
     }
+
+
     public static void main(String[] args) {
         ProductDao productDao = new ProductDao();
         System.out.println(productDao.getAll());

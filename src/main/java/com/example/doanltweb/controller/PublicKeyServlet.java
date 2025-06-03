@@ -55,7 +55,7 @@ public class PublicKeyServlet extends HttpServlet {
             }
         } else if(newPublicKey!=null){
              success = dao.savePublicKey(newPublicKey, user.getId());
-        }else if(sign!=null){
+        }else {
             OrderDao orderDao = new OrderDao();
             success = orderDao.insertSignature(sign, user.getId());
         }
