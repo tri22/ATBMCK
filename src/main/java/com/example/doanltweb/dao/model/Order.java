@@ -49,7 +49,9 @@ public class Order {
 	public String getSign() {
 		return sign;
 	}
-
+	public void setSign(String sign) {
+		this.sign=sign;
+	}
 	public User getUser() {
 		return user;
 	}

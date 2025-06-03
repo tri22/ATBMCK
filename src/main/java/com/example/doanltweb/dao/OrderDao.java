@@ -212,7 +212,7 @@ public class OrderDao {
 							order.setQuantity(rs.getInt("quantity"));
 							order.setTotalPrice(rs.getDouble("totalPrice"));
 							order.setStatus(rs.getString("status"));
-
+							order.setSign(rs.getString("sign"));
 							User user = userDao.getUserbyid(rs.getInt("idUser"));  // Lấy thông tin người dùng
 							Payment payment = paymentDao.getPaymentbyid(rs.getInt("idPayment"));
 							order.setUser(user);
@@ -240,6 +240,7 @@ public class OrderDao {
 	                  order.setQuantity(rs.getInt("quantity"));
 	                  order.setTotalPrice(rs.getDouble("totalPrice"));
 	                  order.setStatus(rs.getString("status"));
+					  order.setSign(rs.getString("sign"));
 	                  User user = userDao.getUserbyid(rs.getInt("idUser"));  // Lấy thông tin người dùng
                       Payment payment = paymentDao.getPaymentbyid(rs.getInt("idPayment"));
 	                  order.setUser(user);

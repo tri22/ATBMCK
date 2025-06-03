@@ -75,6 +75,9 @@ public class UserProfileServlet extends HttpServlet {
 				if(!verify){
 					order.setStatus("NOT VERIFIED");
 					orderDao.updateStatus(order.getId(),"NOT VERIFIED");
+				}else {
+					order.setStatus("VERIFIED");
+					orderDao.updateStatus(order.getId(),"VERIFIED");
 				}
             } catch (Exception e) {
                 throw new RuntimeException(e);
