@@ -132,37 +132,46 @@
 									<thead class="table-light">
 										<tr>
 											<th class="bg-dark-blue text-light">Ngày đặt hàng</th>
+											<th class="bg-dark-blue text-light">Người đặt hàng</th>
 											<th class="bg-dark-blue text-light">Tổng số lượng</th>
 											<th class="bg-dark-blue text-light">Tổng tiền</th>
 											<th class="bg-dark-blue text-light">Trạng thái</th>
+											<th class="bg-dark-blue text-light">Thao tác</th>
 											<th class="bg-dark-blue text-light"></th>
 										</tr>
 									</thead>
 									<tbody>
-
 										<c:forEach var="entry" items="${orderMap}">
 											<c:set var="order" value="${entry.key}" />
 											<c:set var="details" value="${entry.value}" />
 
 											<tr style="cursor: pointer;" class="table-row-main">
 												<td>${order.orderDate}</td>
-												<td onclick="toggleDetails(${order.id})">${order.user.fullname}</td>
-												<td onclick="toggleDetails(${order.id})">${order.quantity}</td>
-												<td onclick="toggleDetails(${order.id})">${order.totalPrice}</td>
-												<td onclick="toggleDetails(${order.id})"
-													data-order-id="${order.id}"><span
-													id="status-${order.id}" class="badge text-dark">${order.status}</span>
-
+												<td >${order.user.fullname}</td>
+												<td >${order.quantity}</td>
+												<td >${order.totalPrice}</td>
+												<td data-order-id="${order.id}">
+													<span id="status-${order.id}" class="badge text-dark">${order.status}</span>
 												</td>
 												<td>
-													<c:if
-														test="${order.status == 'PENDING' || order.status == 'VERIFIED'}">
+													<c:if test="${order.status == 'NOT VERIFIED'}">
 														<button id="btn-${order.id}" class="btn btn-danger btn-sm"
-															onclick="cancelOrder(${order.id})">Hủy đơn</button>
-													</c:if> <c:if test="${order.status == 'PENDING'}">
+															onclick="cancelOrder(${order.id})">Hủy đơn
+														</button>
+
 														<button id="btn-confirm-${order.id}"
 															onclick="showOtpModal(${order.id})"
-															class="btn btn-success btn-sm">Xác nhận</button>
+															class="btn btn-success btn-sm">Xác nhận
+														</button>
+													</c:if>
+												</td>
+												<td>
+													<c:if test="${order.status == 'NOT VERIFIED'}">
+														<input type="hidden" id="order-details-${order.id}" value="<c:out value='${details}' />">
+														<button id="btn-confirm-${order.id}"
+																onclick="copyOrderInfo(${order.id})"
+																class="btn btn-success btn-sm">Lấy thông tin
+														</button>
 													</c:if>
 												</td>
 											</tr>
@@ -180,17 +189,17 @@
 													</div>
 													<div class="modal-body">
 														<form id="verifyOtpForm">
-															<input type="hidden" class="form-control" name="orderId"
-																id="orderId">
-															<div class="mb-3">
-																<label for="otp" class="form-label">Nhập OTP:</label> <input
-																	type="text" class="form-control" id="otp" name="otp"
-																	required>
+															<input type="hidden" id="orderId" value="0">
+															<div class="input-group mb-3">
+																<span class="input-group-text">Chữ ký</span>
+																<textarea type="text" class="form-control" name="signature"
+																		  id="signature-field" required > </textarea>
 															</div>
 															<div id="verifyMessage" class="mt-2"></div>
 															<div class="d-grid gap-2 mt-3">
-																<button type="submit" class="btn btn-primary">Xác
-																	nhận</button>
+																<button type="submit" class="btn btn-primary">
+																	Xác nhận
+																</button>
 															</div>
 														</form>
 													</div>
@@ -235,19 +244,27 @@
 	<script src="assets/js/nav.js"></script>
 	<script src="assets/js/userProfile.js"></script>
 	<script>
-	function toggleDetails(orderId) {
-		let detailsRow = document.getElementById("orderDetails-" + orderId);
-		if (detailsRow) {
-			detailsRow.classList.toggle("show");
-		} else {
-			console.error("Không tìm thấy phần tử orderDetails" + orderId);
+		function copyOrderInfo(orderId) {
+			const value = $("#order-details-" + orderId).val(); // Lấy  giá trị
+			if (!value) {
+				console.error("Không tìm thấy input order-details-" + orderId + " hoặc giá trị rỗng.");
+				alert("Không tìm thấy thông tin đơn hàng để sao chép.");
+				return;
+			}
+			const tempTextArea = document.createElement("textarea");
+			tempTextArea.value = value;
+			document.body.appendChild(tempTextArea);
+			tempTextArea.select();
+			document.execCommand("copy");
+			document.body.removeChild(tempTextArea);
+
+			alert("Đã sao chép thông tin đơn hàng!");
 		}
-	}
+
 
 	function showOtpModal(orderId) {
 	    $('#otpModal').modal('show');
-	    $('#otpModalLabel').text('Xác nhận đơn hàng #' + orderId); // Đổi title cho đẹp
-	    $('#orderId').val(orderId); // Gán orderId vào hidden input
+		$('#orderId').val(orderId)
 	}
 
 
@@ -262,8 +279,8 @@
 	    $('#verifyOtpForm').submit(function (event) {
 	        event.preventDefault();
 
-	        var orderId = $('#orderId').val();
-	        var otp = $('#otp').val();
+			var orderId = $('#orderId').val()
+	        var sign = $('#signature-field').val();
 	        var messageDiv = $('#verifyMessage');
 
 	        $.ajax({
@@ -271,7 +288,7 @@
 	            type: 'POST',
 	            data: {
 	                orderId: orderId,
-	                otp: otp
+					sign: sign
 	            },
 	            success: function (data) {
 	                if (typeof data === 'string') {
@@ -290,6 +307,7 @@
 	    				if (statusCell) {
 	    					statusCell.textContent = "VERIFIED";
 	    					$('#btn-confirm-' + orderId).hide();
+							$('#btn-' + orderId).hide();
 	    				} else {
 	    					console.warn(`Không tìm thấy phần tử với id: ${elementId}`);
 	    				}
@@ -353,7 +371,42 @@
 			});
 		});
 	</script>
+<script>
+	$(document).ready(function () {
+		let paymentMethod = null;
 
+		// Bắt sự kiện submit form đơn hàng
+		$('#orderForm').submit(function (event) {
+			event.preventDefault(); // Không submit form gốc
+
+			// Lấy phương thức thanh toán từ form
+			paymentMethod = $('#paymentMethod').val(); // Đúng
+
+
+			// Gửi AJAX để tạo dữ liệu cần ký và gửi mail
+			$.ajax({
+				url: '/DoAnLTWeb/PreOrder', // Servlet trả về dữ liệu cần ký + gửi mail
+				method: 'POST',
+				data: {
+					paymentMethod: paymentMethod
+				},
+				dataType: 'json',
+				success: function (response) {
+					if (response.success) {
+
+						// Mở modal ký chữ ký
+						$('#addSignatureModal').modal('show');
+					} else {
+						alert("Không thể khởi tạo đơn hàng!");
+					}
+				},
+				error: function () {
+					alert("Lỗi kết nối server!");
+				}
+			});
+		});
+	})
+</script>
 
 </body>
 </html>

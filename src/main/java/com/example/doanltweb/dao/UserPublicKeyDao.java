@@ -37,6 +37,21 @@ public class UserPublicKeyDao {
         );
     }
 
+    public String getValidPublicKey(LocalDateTime orderDate, int userId) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("SELECT public_key FROM user_public_key WHERE user_id = :userId \n"+
+                                "AND create_at >= :orderDate \n"+
+                                "AND (end_time IS NULL OR :orderDate >= end_time) \n"+
+                                "ORDER BY create_at DESC LIMIT 1")
+                        .bind("userId", userId)
+                        .bind("orderDate", orderDate)
+                        .mapTo(String.class)
+                        .findOne()
+                        .orElse(null)
+        );
+    }
+
+
 
     // cập nhật key khi báo mất key
     public boolean report(int userId,LocalDateTime endTime) throws Exception {
