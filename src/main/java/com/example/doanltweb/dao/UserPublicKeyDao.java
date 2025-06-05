@@ -39,10 +39,12 @@ public class UserPublicKeyDao {
 
     public String getValidPublicKey(LocalDateTime orderDate, int userId) {
         return jdbi.withHandle(handle ->
-                handle.createQuery("SELECT public_key FROM user_public_key WHERE user_id = :userId \n"+
-                                "AND create_at >= :orderDate \n"+
-                                "AND (end_time IS NULL OR :orderDate >= end_time) \n"+
-                                "ORDER BY create_at DESC LIMIT 1")
+                handle.createQuery("SELECT public_key FROM user_public_key " +
+                                "WHERE user_id = :userId " +
+                                "AND create_at <= :orderDate " +
+                                "AND (:orderDate <= end_time OR end_time IS NULL) " +
+                                "ORDER BY create_at DESC " +
+                                "LIMIT 1")
                         .bind("userId", userId)
                         .bind("orderDate", orderDate)
                         .mapTo(String.class)
@@ -50,6 +52,7 @@ public class UserPublicKeyDao {
                         .orElse(null)
         );
     }
+
 
 
 

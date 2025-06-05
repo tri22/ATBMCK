@@ -154,11 +154,12 @@
 													<span id="status-${order.id}" class="badge text-dark">${order.status}</span>
 												</td>
 												<td>
-													<c:if test="${order.status == 'NOT VERIFIED'}">
-														<button id="btn-${order.id}" class="btn btn-danger btn-sm"
-															onclick="cancelOrder(${order.id})">Hủy đơn
+													<c:if test="${order.status != 'COMPLETED' and order.status != 'SHIPPED' and order.status != 'PROCESSING'}">
+													<button id="btn-${order.id}" class="btn btn-danger btn-sm"
+																onclick="cancelOrder(${order.id})">Hủy đơn
 														</button>
-
+													</c:if>
+													<c:if test="${order.status == 'NOT VERIFIED'}">
 														<button id="btn-confirm-${order.id}"
 															onclick="showOtpModal(${order.id})"
 															class="btn btn-success btn-sm">Xác nhận
@@ -166,13 +167,13 @@
 													</c:if>
 												</td>
 												<td>
-													<c:if test="${order.status == 'NOT VERIFIED'}">
+
 														<input type="hidden" id="order-details-${order.id}" value="<c:out value='${details}' />">
 														<button id="btn-confirm-${order.id}"
 																onclick="copyOrderInfo(${order.id})"
 																class="btn btn-success btn-sm">Lấy thông tin
 														</button>
-													</c:if>
+
 												</td>
 											</tr>
 										</c:forEach>
