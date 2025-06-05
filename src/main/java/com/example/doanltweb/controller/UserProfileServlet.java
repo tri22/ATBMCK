@@ -70,6 +70,7 @@ public class UserProfileServlet extends HttpServlet {
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 			LocalDateTime parsedOrderDate = LocalDateTime.parse(order.getOrderDate(), formatter);
 			String publicKey = userPublicKeyDao.getValidPublicKey(parsedOrderDate,user.getId());
+			System.out.println(publicKey);
             try {
                 boolean verify = ds.verifySignature(orderData,order.getSign().trim(),publicKey);
 				if(!verify){

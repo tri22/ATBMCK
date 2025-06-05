@@ -41,8 +41,7 @@ public class PublicKeyServlet extends HttpServlet {
         UserPublicKeyDao dao = new UserPublicKeyDao();
         String date = request.getParameter("date");
         String newPublicKey = request.getParameter("public-key");
-        String sign = request.getParameter("signature").trim();
-        System.out.println("Signature raw: " + sign);
+        String sign = request.getParameter("signature");
 
         boolean success = false;
         if (date != null && newPublicKey == null) {
@@ -55,9 +54,10 @@ public class PublicKeyServlet extends HttpServlet {
             }
         } else if(newPublicKey!=null){
              success = dao.savePublicKey(newPublicKey, user.getId());
-        }else {
+        }else if(sign != null){
+
             OrderDao orderDao = new OrderDao();
-            success = orderDao.insertSignature(sign, user.getId());
+            success = orderDao.insertSignature(sign.trim(), user.getId());
         }
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json");
