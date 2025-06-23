@@ -63,8 +63,8 @@
 												style="text-decoration: none">
 												<div class="card position-relative">
 													<div class="discount-badge">-10%</div>
-													<img src="${p.image}"
-														class="card-img-top" alt="Bơm tăng áp mini Pamtex 10" />
+													<img src="assets/imgs/maybom/${p.image}"
+														class="card-img-top" />
 													<div class="card-body themaybom" style="height: 200px">
 														<h6 class="card-title">${p.nameProduct}</h6>
                                                         <p class="new-price"></p>
@@ -119,8 +119,8 @@
 												style="text-decoration: none">
 												<div class="card position-relative">
 													<div class="discount-badge">-10%</div>
-													<img src="${p.image}"
-														class="card-img-top" alt="Bơm tăng áp mini Pamtex 10" />
+													<img src="assets/imgs/maybom/${p.image}"
+														class="card-img-top" />
 													<div class="card-body themaybom" style="height: 200px">
 														<h6 class="card-title">${p.nameProduct}</h6>
 														<p class="old-price"></p>

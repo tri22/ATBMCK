@@ -31,16 +31,8 @@ public class ProductDao {
                             product.setPriceProduct(rs.getDouble("priceProduct"));
                             product.setDescription(rs.getString("description"));
                             product.setManufactureDate(rs.getString("manufactureDate"));
-                            product.setPower(rs.getString("power"));
-                            product.setPressure(rs.getDouble("pressure"));
-                            product.setFlowRate(rs.getDouble("flowRate"));
-                            product.setPipeDiameter(rs.getDouble("pipeDiameter"));
-                            product.setVoltage(rs.getInt("voltage"));
-                            product.setBrand(rs.getString("brand"));
-                            product.setWarrantyMonths(rs.getInt("warrantyMonths"));
                             product.setStock(rs.getInt("stock"));
                             product.setIdCategory(rs.getInt("idCategory"));
-                            product.setIdSupplier(rs.getInt("idSupplier"));
                             return product;
                         })
                         .list());
@@ -61,16 +53,8 @@ public class ProductDao {
                         .bind("priceProduct", product.getPriceProduct())
                         .bind("description", product.getDescription())
                         .bind("manufactureDate", product.getManufactureDate())
-                        .bind("power", product.getPower())
-                        .bind("pressure", product.getPressure())
-                        .bind("flowRate", product.getFlowRate())
-                        .bind("pipeDiameter", product.getPipeDiameter())
-                        .bind("voltage", product.getVoltage())
-                        .bind("brand", product.getBrand())
-                        .bind("warrantyMonths", product.getWarrantyMonths())
                         .bind("stock", product.getStock())
                         .bind("idCategory", product.getIdCategory())
-                        .bind("idSupplier", product.getIdSupplier())
                         .execute(); // Thực thi câu lệnh SQL INSERT
             });
 
@@ -106,16 +90,8 @@ public class ProductDao {
                             .bind("priceProduct", product.getPriceProduct())
                             .bind("description", product.getDescription())
                             .bind("manufactureDate", product.getManufactureDate())
-                            .bind("power", product.getPower())
-                            .bind("pressure", product.getPressure())
-                            .bind("flowRate", product.getFlowRate())
-                            .bind("pipeDiameter", product.getPipeDiameter())
-                            .bind("voltage", product.getVoltage())
-                            .bind("brand", product.getBrand())
-                            .bind("warrantyMonths", product.getWarrantyMonths())
                             .bind("stock", product.getStock())
                             .bind("idCategory", product.getIdCategory())
-                            .bind("idSupplier", product.getIdSupplier())
                             .execute()
             );
 
