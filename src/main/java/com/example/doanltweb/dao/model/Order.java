@@ -13,6 +13,7 @@ public class Order {
 	private Payment paymentMethod;
 	private int quantity;
 	private String sign;
+	private String verifyDate;
 
 	public int getId() {
 		return id;
@@ -38,12 +39,18 @@ public class Order {
 	public void setStatus(String status) {
 		this.status = status;
 	}
-
 	public int getQuantity() {
 		return quantity;
 	}
 	public void setQuantity(int quantity) {
 		this.quantity = quantity;
+	}
+	public String getVerifyDate() {
+		return verifyDate;
+	}
+
+	public void setVerifyDate(String verifyDate) {
+		this.verifyDate = verifyDate;
 	}
 
 	public String getSign() {
@@ -67,7 +74,7 @@ public class Order {
 	public Order() {
 		super();
 	}
-	public Order(int id, User user, double totalPrice, String orderDate, String status, Payment paymentMethod,
+	public Order(int id, User user, double totalPrice, String orderDate, String status, Payment paymentMethod,String verifyDate,
 			int quantity, String sign) {
 		super();
 		this.id = id;
@@ -78,6 +85,7 @@ public class Order {
 		this.paymentMethod = paymentMethod;
 		this.quantity = quantity;
 		this.sign = sign;
+		this.verifyDate = verifyDate;
 	}
 	public Order( User user, double totalPrice, String orderDate, String status, Payment paymentMethod,
 				 int quantity) {

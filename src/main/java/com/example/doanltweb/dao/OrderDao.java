@@ -39,9 +39,10 @@ public class OrderDao {
 	                    int idPayment = rs.getInt("idPayment");
 	                    int quantity = rs.getInt("quantity");
 						String sign = rs.getString("sign");
+						String verifyDate = rs.getString("verifyDate");
 	                    User user = userDao.getUserbyid(userId);
 	                    Payment payment = paymentDao.getPaymentbyid(idPayment);
-	                    return new Order(orderId, user, totalPrice, orderDate, status, payment, quantity,sign);
+	                    return new Order(orderId, user, totalPrice, orderDate, status, payment,verifyDate, quantity,sign);
 	                }).list());
 	    }
 	    public List<Order> getActiveOrder(int id) {
@@ -58,9 +59,10 @@ public class OrderDao {
 	                int idPayment = rs.getInt("idPayment");
 	                int quantity = rs.getInt("quantity");
 	                String sign = rs.getString("sign");
-	                User user = userDao.getUserbyid(userId);
-	                Payment payment = paymentDao.getPaymentbyid(idPayment);
-	                return new Order(orderId, user, totalPrice, orderDate, status, payment, quantity, sign);
+					String verifyDate = rs.getString("verifyDate");
+					User user = userDao.getUserbyid(userId);
+					Payment payment = paymentDao.getPaymentbyid(idPayment);
+					return new Order(orderId, user, totalPrice, orderDate, status, payment,verifyDate, quantity,sign);
 	            })
 	            .list()
 	        );
@@ -96,10 +98,10 @@ public class OrderDao {
 	                      int idPayment = rs.getInt("idPayment");
 	                      int quantity = rs.getInt("quantity");
 						  String sign = rs.getString("sign");
-	                      User user = userDao.getUserbyid(userId);  // Lấy thông tin người dùng
-	                      Payment payment = paymentDao.getPaymentbyid(idPayment);
-	                      System.out.println(payment.getName());
-	                      return new Order(orderId, user, totalPrice, orderDate, status, payment, quantity,sign);
+						  String verifyDate = rs.getString("verifyDate");
+						  User user = userDao.getUserbyid(userId);
+						  Payment payment = paymentDao.getPaymentbyid(idPayment);
+						  return new Order(orderId, user, totalPrice, orderDate, status, payment,verifyDate, quantity,sign);
 	                  })
 	                  .list()  // Trả về danh sách đơn hàng
 	        );
@@ -136,8 +138,8 @@ public class OrderDao {
 	            return jdbi.inTransaction(handle -> {
 	                // 1️⃣ Chèn đơn hàng mới và lấy ID đơn hàng
 	                int orderId = handle.createUpdate(
-	                        "INSERT INTO orders (idUser, totalPrice, orderDate, status, idPayment,quantity,sign) " +
-	                        "VALUES (:userId, :totalPrice, NOW(), 'VERIFIED',:idPayment,:quantity,:sign)")
+	                        "INSERT INTO orders (idUser, totalPrice, orderDate, status, idPayment,quantity,sign,verifyDate) " +
+	                        "VALUES (:userId, :totalPrice, NOW(), 'VERIFIED',:idPayment,:quantity,:sign, NOW()")
 	                    .bind("userId", userId)
 	                    .bind("totalPrice", totalPrice)
 	                    .bind("idPayment", idPayment)
@@ -183,6 +185,15 @@ public class OrderDao {
 		    .execute());
 			return rowsAffected>0;
 		}
+
+	public boolean updateVerifyDate(int id) {
+		Jdbi jdbi = JDBIConnect.get();
+		int rowsAffected = jdbi.withHandle(handle ->
+				handle.createUpdate("UPDATE orders SET verifyDate = NOW() WHERE id = :id")
+						.bind("id", id)
+						.execute());
+		return rowsAffected>0;
+	}
 
 		public List<OrderDetail> getAllDetail() {
 		Jdbi jdbi = JDBIConnect.get();
@@ -307,11 +318,10 @@ public class OrderDao {
 				int idPayment = rs.getInt("idPayment");
 				int quantity = rs.getInt("quantity");
 				String sign = rs.getString("sign");
-
+				String verifyDate = rs.getString("verifyDate");
 				User user = userDao.getUserbyid(userId);
 				Payment payment = paymentDao.getPaymentbyid(idPayment);
-
-				return new Order(orderId, user, totalPrice, orderDate, orderStatus, payment, quantity, sign);
+				return new Order(orderId, user, totalPrice, orderDate, status, payment,verifyDate, quantity,sign);
 			}).list();
 		});
 

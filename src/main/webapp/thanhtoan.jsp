@@ -173,7 +173,6 @@
             let formData = new FormData(document.getElementById("orderForm"));
             formData.append("signature", signature);
 
-
             if (!signature) {
                 messageDiv.html('<div class="alert alert-danger">Thiếu dữ liệu để ký!</div>');
                 return;

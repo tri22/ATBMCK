@@ -68,7 +68,7 @@ public class OrderController extends HttpServlet {
             jsonData.add("orderDetails", orderDetailsArray);
             String orderData = jsonData.toString();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            LocalDateTime parsedOrderDate = LocalDateTime.parse(order.getOrderDate(), formatter);
+            LocalDateTime parsedOrderDate = LocalDateTime.parse(order.getVerifyDate(), formatter);
             String publicKey = userPublicKeyDao.getValidPublicKey(parsedOrderDate,order.getUser().getId());
             try {
                 boolean verify = ds.verifySignature(orderData,order.getSign().trim(),publicKey);

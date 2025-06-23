@@ -16,7 +16,7 @@ $(document).ready(function () {
 	    $.each(data, function (i, product) {
 	      productsHtml += `
 	        <div class="col-md-3 text-center">
-	          <img src="${product.image}" class="img-fluid mb-2" alt="${product.nameProduct}" style="max-height: 150px; object-fit: contain;">
+	          <img src="assets/imgs/sanpham/${product.image}" class="img-fluid mb-2" alt="${product.nameProduct}" style="max-height: 150px; object-fit: contain;">
 	          <h6 class="mt-2">${product.nameProduct}</h6>
 	          <p class="text-muted">${product.priceProduct.toLocaleString()} VNĐ</p>
 	        </div>`;

@@ -63,7 +63,7 @@
 												style="text-decoration: none">
 												<div class="card position-relative">
 													<div class="discount-badge">-10%</div>
-													<img src="assets/imgs/maybom/${p.image}"
+													<img src="assets/imgs/sanpham/${p.image}"
 														class="card-img-top" />
 													<div class="card-body themaybom" style="height: 200px">
 														<h6 class="card-title">${p.nameProduct}</h6>
@@ -119,7 +119,7 @@
 												style="text-decoration: none">
 												<div class="card position-relative">
 													<div class="discount-badge">-10%</div>
-													<img src="assets/imgs/maybom/${p.image}"
+													<img src="assets/imgs/sanpham/${p.image}"
 														class="card-img-top" />
 													<div class="card-body themaybom" style="height: 200px">
 														<h6 class="card-title">${p.nameProduct}</h6>

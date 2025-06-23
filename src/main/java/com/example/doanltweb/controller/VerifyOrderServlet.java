@@ -91,8 +91,9 @@ public class VerifyOrderServlet extends HttpServlet {
 				if (success) {
 					boolean updated = orderDao.updateStatus(orderId,"VERIFIED");
 					boolean inserted = orderDao.insertSignature(signature,user.getId());
-					jsonResponse.addProperty("success", updated&&inserted);
-					jsonResponse.addProperty("message", updated&&inserted ? "Thành công!" : "Thất bại");
+					boolean updateVerifyDate = orderDao.updateVerifyDate(orderId);
+					jsonResponse.addProperty("success", updated&&inserted&&updateVerifyDate);
+					jsonResponse.addProperty("message", updated&&inserted&&updateVerifyDate ? "Thành công!" : "Thất bại");
 				}
 
 	        }

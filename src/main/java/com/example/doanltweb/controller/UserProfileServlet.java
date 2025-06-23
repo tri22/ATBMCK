@@ -68,7 +68,7 @@ public class UserProfileServlet extends HttpServlet {
 			String orderData = jsonData.toString();
 			orderInfo.put(order, orderData);
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-			LocalDateTime parsedOrderDate = LocalDateTime.parse(order.getOrderDate(), formatter);
+			LocalDateTime parsedOrderDate = LocalDateTime.parse(order.getVerifyDate(), formatter);
 			String publicKey = userPublicKeyDao.getValidPublicKey(parsedOrderDate,user.getId());
 			System.out.println(publicKey);
             try {
