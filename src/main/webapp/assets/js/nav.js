@@ -33,3 +33,32 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
+$('#confirm-btn').click(function () {
+    const email = $('#emailInput').val().trim();
+    if (!email) {
+        alert("Vui lòng nhập email.");
+        return;
+    }
+    // Gửi Ajax đến servlet gửi OTP
+    $.ajax({
+        url: '/DoAnLTWeb/SendOtpServlet',
+        type: 'POST',
+        data: {email: email},
+        success: function (response) {
+            if (response.trim() === 'success') {
+                // Hiện OTP + đổi giao diện
+                $('#otp-group').removeClass('d-none');
+                $('#confirm-btn').addClass('d-none');
+                $('#submit-otp-btn').removeClass('d-none');
+                $('#step-text').text("Nhập mã OTP đã gửi đến email của bạn.");
+            } else {
+                alert("Không thể gửi OTP. Vui lòng thử lại.");
+            }
+        },
+        error: function () {
+            alert("Có lỗi xảy ra khi gửi OTP.");
+        }
+    });
+});
+
+

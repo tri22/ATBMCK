@@ -12,8 +12,8 @@ public class Order {
 	private String status;
 	private Payment paymentMethod;
 	private int quantity;
-	private String otp;
-	private boolean verified;
+	private String sign;
+	private String verifyDate;
 
 	public int getId() {
 		return id;
@@ -39,22 +39,26 @@ public class Order {
 	public void setStatus(String status) {
 		this.status = status;
 	}
-
 	public int getQuantity() {
 		return quantity;
 	}
 	public void setQuantity(int quantity) {
 		this.quantity = quantity;
 	}
-
-	public boolean isVerified() {
-		return verified;
+	public String getVerifyDate() {
+		return verifyDate;
 	}
 
-	public String getOtp() {
-		return otp;
+	public void setVerifyDate(String verifyDate) {
+		this.verifyDate = verifyDate;
 	}
 
+	public String getSign() {
+		return sign;
+	}
+	public void setSign(String sign) {
+		this.sign=sign;
+	}
 	public User getUser() {
 		return user;
 	}
@@ -70,8 +74,8 @@ public class Order {
 	public Order() {
 		super();
 	}
-	public Order(int id, User user, double totalPrice, String orderDate, String status, Payment paymentMethod,
-			int quantity,String otp) {
+	public Order(int id, User user, double totalPrice, String orderDate, String status, Payment paymentMethod,String verifyDate,
+			int quantity, String sign) {
 		super();
 		this.id = id;
 		this.user = user;
@@ -80,7 +84,17 @@ public class Order {
 		this.status = status;
 		this.paymentMethod = paymentMethod;
 		this.quantity = quantity;
-		this.otp = otp;
+		this.sign = sign;
+		this.verifyDate = verifyDate;
+	}
+	public Order( User user, double totalPrice, String orderDate, String status, Payment paymentMethod,
+				 int quantity) {
+		this.user = user;
+		this.totalPrice = totalPrice;
+		this.orderDate = orderDate;
+		this.status = status;
+		this.paymentMethod = paymentMethod;
+		this.quantity = quantity;
 	}
 
 

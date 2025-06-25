@@ -1,6 +1,13 @@
 package com.example.doanltweb.controller;
 
 import com.example.doanltweb.dao.OrderDao;
+import com.example.doanltweb.dao.UserPublicKeyDao;
+import com.example.doanltweb.dao.model.CartItem;
+import com.example.doanltweb.dao.model.Order;
+import com.example.doanltweb.dao.model.OrderDetail;
+import com.example.doanltweb.dao.model.User;
+import com.example.doanltweb.digitalSign.DigitalSignature;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import jakarta.servlet.ServletException;
@@ -9,9 +16,13 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @MultipartConfig
 @WebServlet("/VerifyOrderServlet")
@@ -41,20 +52,50 @@ public class VerifyOrderServlet extends HttpServlet {
 	    response.setContentType("application/json");
 	    response.setCharacterEncoding("UTF-8");
 	    JsonObject jsonResponse = new JsonObject();
+		HttpSession session = request.getSession();
+
+		UserPublicKeyDao userPublicKeyDao = new UserPublicKeyDao();
+		DigitalSignature ds = new DigitalSignature();
+		User user = (User) session.getAttribute("auth");
 	    try {
 	        OrderDao orderDao = new OrderDao();
-	        String orderIdStr = request.getParameter("orderId");
-	        String otp = request.getParameter("otp").trim();
-	        System.out.println(orderIdStr);
-	        System.out.println(otp);
-	        if (orderIdStr != null && !orderIdStr.isEmpty()) {
+	        String signature = request.getParameter("sign").trim();
+			String orderIdStr = request.getParameter("orderId").trim();
+	        if (!orderIdStr.isEmpty()) {
 	            int orderId = Integer.parseInt(orderIdStr);
-	            boolean success = orderDao.verifyOrder(orderId, otp);
-	            jsonResponse.addProperty("success", success);
-	            jsonResponse.addProperty("message", success ? "Thành công!" : "Thất bại");
-	        } else {
-	            jsonResponse.addProperty("success", false);
-	            jsonResponse.addProperty("message", "Thiếu orderId hoặc otp.");
+				Order order = orderDao.getById(orderId);
+
+				JsonObject jsonData = new JsonObject();
+				jsonData.addProperty("idUser", user.getId());
+				jsonData.addProperty("totalPrice", order.getTotalPrice());
+				jsonData.addProperty("orderDate", order.getOrderDate());
+				jsonData.addProperty("idPayment", order.getPaymentMethod().getId());
+				jsonData.addProperty("quantity", order.getQuantity());
+				List<OrderDetail> orderDetails = orderDao.getDetailById(orderId);
+				JsonArray orderDetailsArray = new JsonArray();
+				for (OrderDetail item : orderDetails) {
+					JsonObject detail = new JsonObject();
+					detail.addProperty("productId", item.getProduct().getId());
+					detail.addProperty("productName", item.getProduct().getNameProduct());
+					detail.addProperty("price", item.getProduct().getPriceProduct());
+					detail.addProperty("quantity", item.getQuantity());
+					orderDetailsArray.add(detail);
+				}
+				jsonData.add("orderDetails", orderDetailsArray);
+
+				String orderData = jsonData.toString();
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+				LocalDateTime parsedOrderDate = LocalDateTime.parse(order.getOrderDate(), formatter);
+				String publicKey = userPublicKeyDao.getValidPublicKey(parsedOrderDate,user.getId());
+	            boolean success = ds.verifySignature(orderData,signature,publicKey);
+				if (success) {
+					boolean updated = orderDao.updateStatus(orderId,"VERIFIED");
+					boolean inserted = orderDao.insertSignature(signature,user.getId());
+					boolean updateVerifyDate = orderDao.updateVerifyDate(orderId);
+					jsonResponse.addProperty("success", updated&&inserted&&updateVerifyDate);
+					jsonResponse.addProperty("message", updated&&inserted&&updateVerifyDate ? "Thành công!" : "Thất bại");
+				}
+
 	        }
 	    } catch (Exception e) {
 	        jsonResponse.addProperty("success", false);

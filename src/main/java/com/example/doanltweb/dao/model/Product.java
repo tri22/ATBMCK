@@ -11,36 +11,21 @@ public class Product implements java.io.Serializable {
         private double priceProduct;
         private String description;
         private String manufactureDate;
-        private String power;
-        private double pressure;
-        private double flowRate;
-        private double pipeDiameter;
-        private int voltage;
-        private String brand;
-        private int warrantyMonths;
         private int stock;
         private int idCategory;
-        private int idSupplier;
 
     public Product() {
     }
 
-        public Product(String nameProduct, String image, double priceProduct, String description, String manufactureDate, String power, double pressure, double flowRate, double pipeDiameter, int voltage, String brand, int warrantyMonths, int stock, int idCategory, int idSupplier) {
+        public Product(String nameProduct, String image, double priceProduct, String description, String manufactureDate, int stock, int idCategory) {
             this.nameProduct = nameProduct;
             this.image = image;
             this.priceProduct = priceProduct;
             this.description = description;
             this.manufactureDate = manufactureDate;
-            this.power = power;
-            this.pressure = pressure;
-            this.flowRate = flowRate;
-            this.pipeDiameter = pipeDiameter;
-            this.voltage = voltage;
-            this.brand = brand;
-            this.warrantyMonths = warrantyMonths;
             this.stock = stock;
             this.idCategory = idCategory;
-            this.idSupplier = idSupplier;
+
         }
 
         public int getId() {
@@ -95,62 +80,6 @@ public class Product implements java.io.Serializable {
             this.manufactureDate = manufactureDate;
         }
 
-        public String getPower() {
-            return power;
-        }
-
-        public void setPower(String power) {
-            this.power = power;
-        }
-
-        public double getPressure() {
-            return pressure;
-        }
-
-        public void setPressure(double pressure) {
-            this.pressure = pressure;
-        }
-
-        public double getFlowRate() {
-            return flowRate;
-        }
-
-        public void setFlowRate(double flowRate) {
-            this.flowRate = flowRate;
-        }
-
-        public int getVoltage() {
-            return voltage;
-        }
-
-        public void setVoltage(int voltage) {
-            this.voltage = voltage;
-        }
-
-        public double getPipeDiameter() {
-            return pipeDiameter;
-        }
-
-        public void setPipeDiameter(double pipeDiameter) {
-            this.pipeDiameter = pipeDiameter;
-        }
-
-        public String getBrand() {
-            return brand;
-        }
-
-        public void setBrand(String brand) {
-            this.brand = brand;
-        }
-
-        public int getWarrantyMonths() {
-            return warrantyMonths;
-        }
-
-        public void setWarrantyMonths(int warrantyMonths) {
-            this.warrantyMonths = warrantyMonths;
-        }
-
         public int getStock() {
             return stock;
         }
@@ -165,14 +94,6 @@ public class Product implements java.io.Serializable {
 
         public void setIdCategory(int idCategory) {
             this.idCategory = idCategory;
-        }
-
-        public int getIdSupplier() {
-            return idSupplier;
-        }
-
-        public void setIdSupplier(int idSupplier) {
-            this.idSupplier = idSupplier;
         }
 
         @Override
@@ -198,16 +119,8 @@ public class Product implements java.io.Serializable {
                     ", priceProduct=" + priceProduct +
                     ", description='" + description + '\'' +
                     ", manufactureDate='" + manufactureDate + '\'' +
-                    ", power='" + power + '\'' +
-                    ", pressure=" + pressure +
-                    ", flowRate=" + flowRate +
-                    ", pipeDiameter=" + pipeDiameter +
-                    ", voltage=" + voltage +
-                    ", brand='" + brand + '\'' +
-                    ", warrantyMonths=" + warrantyMonths +
                     ", stock=" + stock +
                     ", idCategory=" + idCategory +
-                    ", idSupplier=" + idSupplier +
                     '}';
         }
     }

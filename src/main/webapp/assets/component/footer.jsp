@@ -14,8 +14,8 @@
         <div class="footer-content-wrapper row ">
             <!-- Description Section -->
             <div class="col-md-3 footer-discription text-start ">
-                <h2 class="dsc-title fw-bold fs-5">CÔNG TY TNHH ĐẦU TƯ THƯƠNG MẠI AQUATECH</h2>
-                <p class="dsc-content">Chuyên phân phối máy bơm nước hiện đại, hiệu suất cao, đáp ứng mọi nhu cầu từ dân dụng đến công nghiệp.</p>
+                <h2 class="dsc-title fw-bold fs-5">CÔNG TY TNHH ĐẦU TƯ THƯƠNG MẠI VeggieHome</h2>
+                <p class="dsc-content">Chuyên phân phối rau củ quả tươi – sạch – an toàn, phục vụ từ hộ gia đình đến doanh nghiệp thực phẩm.</p>
                 <div class="footer-social-icon d-flex justify-content-evenly">
                     <a href="#"><i class="fab fa-twitter text-light"></i></a>
                     <a href="#"><i class="fab fa-facebook-f text-light"></i></a>
@@ -58,7 +58,7 @@
                     </div>
                     <div class="question-mail d-flex align-items-start">
                         <i class="bi bi-envelope-fill me-2"></i>
-                        <a href="mailto:brofoods@gmail.com" class="mb-0 text-light" >aquatech@gmail.com</a>
+                        <a href="mailto:brofoods@gmail.com" class="mb-0 text-light" >VeggieHome@gmail.com</a>
                     </div>
                 </div>
             </div>

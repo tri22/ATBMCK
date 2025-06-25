@@ -1,5 +1,8 @@
 package com.example.doanltweb.controller;
 
+import com.example.doanltweb.dao.UserPublicKeyDao;
+import com.example.doanltweb.dao.model.CartItem;
+import com.example.doanltweb.digitalSign.DigitalSignature;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -11,6 +14,9 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,12 +40,52 @@ public class UserProfileServlet extends HttpServlet {
 		// TODO Auto-generated method stub
 		// Xử lý các yêu cầu GET nếu có (chẳng hạn hiển thị thông tin người dùng)
 		HttpSession session = request.getSession();
-
-    User user = (User) session.getAttribute("auth");
+		DigitalSignature ds = new DigitalSignature();
+		UserPublicKeyDao userPublicKeyDao = new UserPublicKeyDao();
+    	User user = (User) session.getAttribute("auth");
 		OrderDao orderDao = new OrderDao();
-
+		Map<Order,String> orderInfo = new HashMap<>();
 		Map<Order,List<OrderDetail>> orders = orderDao.getOrderWithDetails(user.getId());
-		request.setAttribute("orderMap", orders);
+		for (Order order : orders.keySet()) {
+
+			JsonObject jsonData = new JsonObject();
+			jsonData.addProperty("idUser", user.getId());
+			jsonData.addProperty("totalPrice", order.getTotalPrice());
+			jsonData.addProperty("orderDate", order.getOrderDate());
+			jsonData.addProperty("idPayment", order.getPaymentMethod().getId());
+			jsonData.addProperty("quantity", order.getQuantity());
+			List<OrderDetail> details = orders.get(order);
+			JsonArray orderDetailsArray = new JsonArray();
+			for (OrderDetail item : details) {
+				JsonObject detail = new JsonObject();
+				detail.addProperty("productId", item.getProduct().getId());
+				detail.addProperty("productName", item.getProduct().getNameProduct());
+				detail.addProperty("price", item.getProduct().getPriceProduct());
+				detail.addProperty("quantity", item.getQuantity());
+				orderDetailsArray.add(detail);
+			}
+			jsonData.add("orderDetails", orderDetailsArray);
+			String orderData = jsonData.toString();
+			orderInfo.put(order, orderData);
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			LocalDateTime parsedOrderDate = LocalDateTime.parse(order.getVerifyDate(), formatter);
+			String publicKey = userPublicKeyDao.getValidPublicKey(parsedOrderDate,user.getId());
+			System.out.println(publicKey);
+            try {
+                boolean verify = ds.verifySignature(orderData,order.getSign().trim(),publicKey);
+				if(!verify){
+					order.setStatus("NOT VERIFIED");
+					orderDao.updateStatus(order.getId(),"NOT VERIFIED");
+				}else {
+					order.setStatus("VERIFIED");
+					orderDao.updateStatus(order.getId(),"VERIFIED");
+				}
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+		request.setAttribute("orderMap", orderInfo);
 		request.getRequestDispatcher("Userprofile.jsp").forward(request, response);
 	}
 

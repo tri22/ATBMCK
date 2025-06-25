@@ -11,7 +11,7 @@
             <!-- Thông tin email -->
             <div class="inf col d-flex align-items-center justify-content-center">
                 <i class="head1-icon bi-cursor-fill"></i>
-                <p class="mb-0">aquatech@gmail.com</p>
+                <p class="mb-0">VeggieHome@gmail.com</p>
             </div>
 
             <!-- Thông tin giao hàng -->
