@@ -8,7 +8,7 @@
 <div id="header">
 	<div
 		class="container d-flex justify-content-between align-items-center py-4">
-		<a href="/DoAnLTWeb/trangchu" class="head-title">AquaTech</a>
+		<a href="/DoAnLTWeb/trangchu" class="head-title">VeggieHome</a>
 		<form action="Search" method="get" class="d-flex">
 			<input name="search" type="search" class="form-control me-2 "
 				placeholder="Search..." style="width: 300px"> <input
@@ -27,7 +27,7 @@
 					class="nav-link text-light">Trang chủ</a></li>
 
 				<li class="list-item-head2 shop-active position-relative"><a
-					class="nav-link shop text-light">Các dòng máy <i
+					class="nav-link shop text-light">Các sản phẩm <i
 						class="bi-caret-down-fill"></i></a>
 					<ul id="categoryList" class="wrap-shop-list bg-dark-blue">
 						

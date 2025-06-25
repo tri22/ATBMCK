@@ -62,11 +62,11 @@
                   <button type="submit" class="btn btn-primary">Gửi đi</button>
                 </form>
                 <p class="mt-3 text-center pt-3">
-                  <b>Công ty TNHH Đầu tư Thương mại Hà Nội Thịnh Vượng</b><br />
-                  Địa chỉ: 268 Trường Chinh - Đống Đa - Hà Nội<br />
+                  <b>Công ty TNHH Đầu tư Thương mại VeggieHome</b><br />
+                  Địa chỉ: KCN Linh Xuân, Dĩ An, Thủ Đức, VN<br />
                   Điện thoại: 09.6205 0033 - 0972 952 882<br />
-                  Email: maybomhanoi@gmail.com<br />
-                  Website: www.maybomhanoi.com
+                  Email: VeggieHome@gmail.com<br />
+                  Website: www.VeggieHome.com
                 </p>
               </div>
 

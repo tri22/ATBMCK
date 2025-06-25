@@ -96,9 +96,6 @@
                         </div>
                         <!-- may bom khuyen mai  -->
                         <div class="container my-4">
-                            <div class="row">
-                                <h4>Máy bơm nước các loại</h4>
-                            </div>
                             <div class="row mb-4">
                                 <div class="col-md-auto">
                                     <p>Sắp xếp theo</p>

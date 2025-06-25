@@ -56,7 +56,7 @@
 												<tr id="cart-item-${item.product.id}" class="cart-item"
 													data-price="${item.product.priceProduct}"
 													data-product-id="${item.product.id}">
-													<td><img src="${item.product.image }"
+													<td><img src="assets/imgs/sanpham/${item.product.image }"
 														class="img-fluid anhhang"
 														style="width: 80px; height: auto;"></td>
 													<td>
