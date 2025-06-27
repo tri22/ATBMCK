@@ -69,8 +69,10 @@ public class UserProfileServlet extends HttpServlet {
 			orderInfo.put(order, orderData);
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 			LocalDateTime parsedOrderDate = LocalDateTime.parse(order.getVerifyDate(), formatter);
-			String publicKey = userPublicKeyDao.getValidPublicKey(parsedOrderDate,user.getId());
-			System.out.println(publicKey);
+			String publicKey = userPublicKeyDao.getValidPublicKey(order.getVerifyDate(),user.getId());
+			System.out.println(orderData);
+			System.out.println(order.getVerifyDate());
+			System.out.println(user.getId());
             try {
                 boolean verify = ds.verifySignature(orderData,order.getSign().trim(),publicKey);
 				if(!verify){

@@ -82,11 +82,9 @@ public class VerifyOrderServlet extends HttpServlet {
 					orderDetailsArray.add(detail);
 				}
 				jsonData.add("orderDetails", orderDetailsArray);
-
 				String orderData = jsonData.toString();
-				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-				LocalDateTime parsedOrderDate = LocalDateTime.parse(order.getOrderDate(), formatter);
-				String publicKey = userPublicKeyDao.getValidPublicKey(parsedOrderDate,user.getId());
+				System.out.println("Data:"+ orderData);
+				String publicKey = userPublicKeyDao.getPublicKey(user.getId());
 	            boolean success = ds.verifySignature(orderData,signature,publicKey);
 				if (success) {
 					boolean updated = orderDao.updateStatus(orderId,"VERIFIED");

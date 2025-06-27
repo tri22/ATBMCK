@@ -1,6 +1,7 @@
 package com.example.doanltweb.dao;
 
 import java.sql.ResultSet;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -17,7 +18,7 @@ import com.example.doanltweb.dao.model.OrderDetail;
 import com.example.doanltweb.dao.model.Payment;
 import com.example.doanltweb.dao.model.Product;
 import com.example.doanltweb.dao.model.User;
-
+import java.sql.Timestamp;
 
 public class OrderDao {
 	  static Map<Integer, Order> data = new HashMap<>();
@@ -131,52 +132,55 @@ public class OrderDao {
 		return map;
 	}
 
-	    public boolean createOrder(int userId, double totalPrice, int idPayment, int quantity, int cartId,String sign) {
-	        Jdbi jdbi = JDBIConnect.get();
+	public boolean createOrder(int userId, double totalPrice, int idPayment, int quantity, int cartId, String sign) {
+		Jdbi jdbi = JDBIConnect.get();
 
-	        try {
-	            return jdbi.inTransaction(handle -> {
-	                // 1️⃣ Chèn đơn hàng mới và lấy ID đơn hàng
-	                int orderId = handle.createUpdate(
-	                        "INSERT INTO orders (idUser, totalPrice, orderDate, status, idPayment,quantity,sign,verifyDate) " +
-	                        "VALUES (:userId, :totalPrice, NOW(), 'VERIFIED',:idPayment,:quantity,:sign, NOW()")
-	                    .bind("userId", userId)
-	                    .bind("totalPrice", totalPrice)
-	                    .bind("idPayment", idPayment)
-	                    .bind("quantity", quantity)
-						.bind("sign",sign)
-	                    .executeAndReturnGeneratedKeys("id")  
-	                    .mapTo(Integer.class)
-	                    .one();
+		try {
+			return jdbi.inTransaction(handle -> {
+				LocalDateTime now = LocalDateTime.now();
+				Timestamp timestampNow = Timestamp.valueOf(now); // ✅ chuyển đổi về Timestamp
 
-	                // 2️⃣ Thêm các mục vào `order_details`
-	                List<CartItem> cartItems = cartDao.getListCartItemByCartId(cartId); // Lấy giỏ hàng của user
+				int orderId = handle.createUpdate(
+								"INSERT INTO orders (idUser, totalPrice, orderDate, status, idPayment, quantity, sign, verifyDate) " +
+										"VALUES (:userId, :totalPrice, :now, 'VERIFIED', :idPayment, :quantity, :sign, :now)")
+						.bind("userId", userId)
+						.bind("totalPrice", totalPrice)
+						.bind("idPayment", idPayment)
+						.bind("quantity", quantity)
+						.bind("sign", sign)
+						.bind("now", timestampNow)
+						.executeAndReturnGeneratedKeys("id")
+						.mapTo(Integer.class)
+						.one();
 
-	                for (CartItem item : cartItems) {
-	                    handle.createUpdate(
-	                            "INSERT INTO detailorder (idOrder, idProduct, quantity, price) " +
-	                            "VALUES (:orderId, :productId, :quantity, :price)")
-	                        .bind("orderId", orderId)
-	                        .bind("productId", item.getProduct().getId())
-	                        .bind("quantity", item.getQuantity())
-	                        .bind("price", item.getProduct().getPriceProduct())
-	                        .execute();
-	                }
+				// Ghi chi tiết đơn hàng
+				List<CartItem> cartItems = cartDao.getListCartItemByCartId(cartId);
+				for (CartItem item : cartItems) {
+					handle.createUpdate(
+									"INSERT INTO detailorder (idOrder, idProduct, quantity, price) " +
+											"VALUES (:orderId, :productId, :quantity, :price)")
+							.bind("orderId", orderId)
+							.bind("productId", item.getProduct().getId())
+							.bind("quantity", item.getQuantity())
+							.bind("price", item.getProduct().getPriceProduct())
+							.execute();
+				}
 
-	                // 3️⃣ Xóa giỏ hàng sau khi đặt hàng thành công
-	                handle.createUpdate("DELETE FROM cart WHERE user_id = :userId")
-	                    .bind("userId", userId)
-	                    .execute();
+				// Xóa giỏ hàng sau khi đặt hàng
+				handle.createUpdate("DELETE FROM cart WHERE user_id = :userId")
+						.bind("userId", userId)
+						.execute();
 
-	                return true; // ✅ Trả về true nếu đặt hàng thành công
-	            });
-	        } catch (Exception e) {
-	            e.printStackTrace();
-	            return false; // ❌ Trả về false nếu có lỗi xảy ra
-	        }
-	    }
+				return true;
+			});
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 
-		public boolean updateStatus(int id, String status) {
+
+	public boolean updateStatus(int id, String status) {
 			Jdbi jdbi = JDBIConnect.get();
 			int rowsAffected = jdbi.withHandle(handle -> 
 			handle.createUpdate("UPDATE orders SET status = :status WHERE id = :id")
@@ -188,9 +192,12 @@ public class OrderDao {
 
 	public boolean updateVerifyDate(int id) {
 		Jdbi jdbi = JDBIConnect.get();
+		LocalDateTime now = LocalDateTime.now();
+		Timestamp timestampNow = Timestamp.valueOf(now);
 		int rowsAffected = jdbi.withHandle(handle ->
-				handle.createUpdate("UPDATE orders SET verifyDate = NOW() WHERE id = :id")
+				handle.createUpdate("UPDATE orders SET verifyDate = :verifyDate WHERE id = :id")
 						.bind("id", id)
+						.bind("verifyDate", timestampNow)
 						.execute());
 		return rowsAffected>0;
 	}
