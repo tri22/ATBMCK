@@ -64,10 +64,6 @@
 									<li>
 										<a data-bs-toggle="modal" data-bs-target="#reportKeyModal" class="dropdown-item" href="#">Báo mất khóa</a>
 									</li>
-									<li>
-										<a data-bs-toggle="modal" data-bs-target="#upadateKeyModal" class="dropdown-item" href="#">Cập nhật khóa</a>
-
-									</li>
 								</ul>
 							</li>
 
@@ -78,16 +74,23 @@
 										<form id="reportKeyForm" action="/DoAnLTWeb/PublicKeyServlet" method="post">
 
 										<div class="modal-header text-dark">
-												<h5 class="modal-title" id="reportKeyModalLabel">Báo mất khóa</h5>
-												<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-											</div>
+											<h5 class="modal-title" id="reportKeyModalLabel">Báo mất khóa</h5>
+											<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng">
+												<span aria-hidden="true">&times;</span>
+											</button>
+										</div>
 
 											<div class="modal-body text-dark border-bottom">
 												<p id="step-text">Bạn có chắc chắn muốn báo mất khóa không?</p>
-												<!-- Email input -->
+												<!-- date input -->
 												<div class="input-group mb-3">
 													<span class="input-group-text">Thời gian mất khóa </span>
-													<input type="datetime-local" class="form-control" name="date" id="lostKeyTime" required>
+													<input  type="datetime-local" class="form-control" name="date" id="lostKeyTime" required>
+												</div>
+												<!-- Public Key input -->
+												<div class="input-group mb-3">
+													<span class="input-group-text">Khóa Public mới </span>
+													<input type="text" class="form-control" name="public-key" id="new-public-key" required>
 												</div>
 											</div>
 											<div id="reportKeyMessage" class="mt-2"></div>
@@ -95,34 +98,6 @@
 												<button type="submit" class="btn btn-primary" style="display: block !important;">Xác nhận</button>
 											</div>
 										</form>
-									</div>
-								</div>
-							</div>
-
-
-
-							<!-- Modal cập nhật public mới -->
-							<div class="modal fade" id="upadateKeyModal" tabindex="-1"
-								  aria-hidden="true">
-								<div class="modal-dialog">
-									<div class="modal-content">
-										<div class="modal-header text-dark">
-											<h5 class="modal-title" >Cập nhật public key mới nhất</h5>
-											<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-										</div>
-										<div class="modal-body">
-											<form id="updateKeyForm" action="/DoAnLTWeb/PublicKeyServlet" method="post">
-												<!-- Public Key input -->
-												<div class="input-group mb-3">
-													<span class="input-group-text">Khóa Public mới </span>
-													<input type="text" class="form-control" name="public-key" id="public-key-field" required>
-												</div>
-												<div id="updateKeyMessage" class="mt-2"></div>
-												<div class="d-grid gap-2 mt-3">
-													<button type="submit" class="btn btn-primary" style="display: block !important;">Xác nhận</button>
-												</div>
-											</form>
-										</div>
 									</div>
 								</div>
 							</div>

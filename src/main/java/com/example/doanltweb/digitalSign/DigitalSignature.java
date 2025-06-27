@@ -17,15 +17,16 @@ public class DigitalSignature {
 
     public DigitalSignature(KeyPair keyPair) {
         this.keyPair = keyPair;
-//ZKcgMQ8EIHm+1+FlRpsGyoaxXlqp8w778Vq/rXUwnzPAW9SFdFR98bL4j72rq+o/hMrjL4NaL2EIYbJnFI1UOaAUQXUlOLniX/Voo9pG5aVAmqyPu5OZ8kk32hBrCjDkfpTDBUKzw0ktBH6k7k784HOp6fhl5V0gFJtgUOD+3BFEQoMfRAgZyew06zc/YWEkGOK+Wt3PB7IQl5JmmslNytieBIhfwy6KPoR2dqlVixxuJZnO+rJbSOlsKwTQfykULNARzxlXt9UUBc7EctOG+lUZqyabt7ACguRJ6I/IDqvW6QTCsogcNWz+ug3xWl1FdKjRk6yf8SKvqgsXLQI6rQ==
     }
 
     public KeyPair generateKey() throws NoSuchAlgorithmException {
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-        keyGen.initialize(2048);
+        SecureRandom random = SecureRandom.getInstanceStrong(); // tạo ngẫu nhiên mạnh
+        keyGen.initialize(2048, random); // truyền random vào
         this.keyPair = keyGen.generateKeyPair();
         return this.keyPair;
     }
+
 
     public KeyPair generateKey(int keySize) throws NoSuchAlgorithmException {
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");

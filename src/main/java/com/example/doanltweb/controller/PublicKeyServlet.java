@@ -15,6 +15,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 
@@ -44,16 +45,17 @@ public class PublicKeyServlet extends HttpServlet {
         String sign = request.getParameter("signature");
 
         boolean success = false;
-        if (date != null && newPublicKey == null) {
+        if (date != null && newPublicKey != null) {
             try {
                 LocalDateTime time = LocalDateTime.parse(date);
-                success =  dao.report(user.getId(), time);
-
+                Timestamp timestamp = Timestamp.valueOf(time);
+                success =  dao.report(user.getId(), timestamp);
+                System.out.println("Report: " + success);
+                success = dao.savePublicKey(newPublicKey, user.getId());
+                System.out.println("Update key: " + success);
             } catch (Exception e) {
                  e.getMessage();
             }
-        } else if(newPublicKey!=null){
-             success = dao.savePublicKey(newPublicKey, user.getId());
         }else if(sign != null){
 
             OrderDao orderDao = new OrderDao();

@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -48,7 +49,8 @@ public class PreOrderServlet extends HttpServlet {
             JsonObject jsonData = new JsonObject();
             jsonData.addProperty("idUser", user.getId());
             jsonData.addProperty("totalPrice", cart.getTotalPrice());
-            LocalDateTime orderTime = LocalDateTime.now();
+            LocalDateTime now = LocalDateTime.now();
+            Timestamp orderTime = Timestamp.valueOf(now);
             session.setAttribute("orderTime", orderTime.toString());
             jsonData.addProperty("orderDate", orderTime.toString());
             jsonData.addProperty("idPayment", paymentMethod);
